@@ -1,0 +1,31 @@
+import { Role } from '../../roles/entities/role.entity';
+import { UserSession } from '../../sessions/entities/session.entity';
+import { AuditLog } from '../../audit/entities/audit-log.entity';
+export declare class User {
+    userId: string;
+    username: string;
+    email: string;
+    passwordHash: string;
+    firstName: string;
+    lastName: string;
+    roleId: string;
+    role: Role;
+    isActive: boolean;
+    isApproved: boolean;
+    mfaEnabled: boolean;
+    mfaSecret: string | null;
+    lastLoginDate: Date | null;
+    passwordLastChangedDate: Date;
+    failedLoginAttempts: number;
+    accountLockedUntil: Date | null;
+    createdBy: string | null;
+    createdByUser: User | null;
+    createdDate: Date;
+    approvedBy: string | null;
+    approvedByUser: User | null;
+    approvedDate: Date | null;
+    updatedBy: string | null;
+    updatedDate: Date;
+    sessions: UserSession[];
+    auditLogs: AuditLog[];
+}
