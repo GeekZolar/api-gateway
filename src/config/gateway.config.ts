@@ -9,4 +9,5 @@ export default () => ({
   userServiceUrl: process.env.USER_SERVICE_URL || 'http://localhost:3001',
   requestTimeout: parseInt(process.env.REQUEST_TIMEOUT || '30000', 10),
   circuitBreakerThreshold: parseInt(process.env.CIRCUIT_BREAKER_THRESHOLD || '5', 10),
+  databaseUrl: process.env.DATABASE_URL,
 });

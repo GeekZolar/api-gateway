@@ -1,0 +1,783 @@
+System Architecture Design
+Inventory Management System
+
+Document Version: 1.0
+Date: February 02, 2026
+Prepared By: Senior Solution Architect
+Client: S&R Foods
+
+Table of Contents
+Architecture Overview
+Logical Architecture
+Physical / Deployment Architecture
+Integration Architecture
+Security Architecture
+Data Architecture
+Technology Stack Recommendations
+Scalability & Performance Considerations
+1. Architecture Overview
+1.1 Architecture Principles
+The Inventory Management System (IMS) architecture is designed based on the following principles:
+Cloud-First: Leverage cloud infrastructure for scalability, reliability, and reduced operational overhead
+API-Driven Integration: All external system integrations use REST APIs or standard protocols
+Separation of Concerns: Clear separation between presentation, business logic, and data layers
+QuickBooks as Financial System of Record: Maintain QuickBooks authority for financial data while IMS manages operational inventory
+Real-Time Data Sync: Minimize latency between systems to ensure data consistency
+Modularity: Design for future extensibility and integration of new sales channels or warehouses
+Security by Design: Implement security controls at every layer
+High Availability: Ensure system uptime during business hours
+1.2 Architecture Style
+Selected Architecture: Layered Architecture with Microservices-Oriented Design Rationale:
+Layered architecture provides clear separation of concerns and maintainability
+Microservices-oriented design allows independent scaling of integration components
+Hybrid approach balances complexity with flexibility for future growth
+1.3 High-Level Architecture Diagram
+┌─────────────────────────────────────────────────────────────────┐
+│                        			User Interface Layer            					             │
+│  			(Web Application - Desktop, Tablet, Mobile Responsive)       			             │
+└───────────────────────────┬─────────────────────────────────────┘
+                                                        		 │
+                                        		HTTPS / REST API
+                                                        		 │
+┌───────────────────────────┴─────────────────────────────────────┐
+│                    				Application Services Layer                     				             │
+│  		┌─────────────┐ ┌─────────────┐ ┌─────────────┐               	             │
+│ 		│ Inventory 	            │ │ Forecasting 		 │ │   Purchase 		   │               	             │
+│ 		│ Management 	            │ │ & Demand   	     	 │ │    Order    	                 │               		│
+│ 		│   Service   	            │ │   Planning 		 │ │ Management 	   │               		│
+│  	└─────────────┘ └─────────────┘ └─────────────┘            	             │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                                  │
+│  		│  Reporting  	            │ │ User       		 │ │ 	Integration	   │               		│
+│  		│  Analytics  	            │ │ Management  	 │ │   	Gateway   	   │              		│
+│  		└─────────────┘ └─────────────┘ └─────────────┘               		│
+└───────────────────────────┬─────────────────────────────────────┘
+                                                        		 │
+                                       		     Internal APIs
+                                                        		 │
+┌───────────────────────────┴─────────────────────────────────────┐
+│                   				Business Logic Layer                           					│
+│  	┌──────────────────┐ ┌──────────────────┐ ┌─────────────────┐ 	│
+│  	│  Inventory Rules                       │ │ Forecasting Logic                     │ │ Replenishment                       │ 	│
+│  	│  FEFO Allocation 	            │ │ Seasonality      		 │  │ Recommendations 	  	 │ 	│
+│  	└──────────────────┘ └──────────────────┘ └─────────────────┘ 	│
+│  		┌──────────────────┐ ┌──────────────────┐                     			│
+│  		│  PO Validation   		│ │  Alert Engine    		  │                     			│
+│  		│  MOQ/Case Pack   		│ │  Notifications   		  │                     			│
+│  		└──────────────────┘ └──────────────────┘                     			│
+└───────────────────────────┬─────────────────────────────────────┘
+                                                        		 │
+┌───────────────────────────┴─────────────────────────────────────┐
+│                       			Data Access Layer                          				             │
+│  ┌──────────────────────────────────────────────────────────┐            │
+│  │    				ORM / Data Access Objects (DAO)                       		            │           │
+│  └──────────────────────────────────────────────────────────┘           │
+└───────────────────────────┬─────────────────────────────────────┘
+                                                        		 │
+┌───────────────────────────┴─────────────────────────────────────┐
+│                         				Data Layer                               				             │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌──────────────────┐  	             │
+│  │   Operational   		     │ │   Analytical    		     │ │   File Storage   		        │                │
+│  │    Database     		     │ │   Data Warehouse		     │ │ (Reports, Logs)		        │ 		│
+│  │  (PostgreSQL)   		     │ │ (Optional)                             │ │                  		        │ 		│
+│  └─────────────────┘ └─────────────────┘ └──────────────────┘  		│
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                   					 Integration Layer                            			             │
+│  		┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           	             │
+│ 		│QuickBooks         │ │ Extensiv             │ │ Diamond             │ │ Shopify              │                         │
+│ 		│ Connector	    │ │   WMS    	            │ │   WMS                │ │ Amazon              │          	             │
+│ 		│          		    │ │ Connector           │ │ Connector           │ │  Faire                  │ 	             │
+│  		└──────────┘ └──────────┘ └──────────┘  └──────────┘          	             │
+└─────────────────────────────────────────────────────────────────┘
+2. Logical Architecture
+2.1 User Interface Layer
+Purpose: Provide intuitive web-based interface for users to interact with the IMS Components:
+2.1.1 Web Application (SPA - Single Page Application)
+Technology: React
+Characteristics:
+Responsive design (desktop, tablet, mobile)
+Rich user experience with minimal page reloads
+Real-time data updates via WebSocket or polling
+Client-side validation and error handling
+
+Key Screens:
+Dashboard (inventory overview, alerts, KPIs)
+Inventory Management (search, view, adjust)
+Purchase Order Management (create, approve, track)
+Forecasting & Replenishment (recommendations, overrides)
+Reporting & Analytics (generate, export)
+Admin Console (user management, configuration)
+
+2.1.2 Mobile Experience (Future Enhancement)
+Mobile-optimized responsive design
+Progressive Web App (PWA) for offline capability
+Barcode scanning for warehouse operations
+2.2 Application Services Layer
+Purpose: Expose business functionality via RESTful APIs; orchestrate business logic 
+Components:
+2.2.1 Inventory Management Service Responsibilities:
+Manage inventory master data (SKUs, locations, quantities)
+Process stock-in and stock-out transactions
+Handle inventory adjustments
+Track lot/batch and expiry dates
+Enforce inventory business rules
+Key APIs:
+GET /api/inventory - Retrieve inventory levels
+GET /api/inventory/{sku} - Get SKU details
+POST /api/inventory/adjust - Create adjustment
+GET /api/inventory/expiring - Get expiring inventory
+POST /api/inventory/transfer - Create transfer
+2.2.2 Forecasting & Demand Planning Service Responsibilities:
+Analyze historical sales data
+Generate demand forecasts
+Detect seasonality and trends
+Apply promotional adjustments
+Calculate reorder points
+Key APIs:
+GET /api/forecasts/{sku} - Get forecast for SKU
+POST /api/forecasts/generate - Trigger forecast generation
+PUT /api/forecasts/{sku} - Override forecast
+GET /api/forecasts/accuracy - Get forecast accuracy metrics
+
+2.2.3 Purchase Order Management Service Responsibilities:
+Create and manage purchase orders
+Validate supplier requirements (MOQ, case pack)
+Manage PO approval workflow
+Track PO status and receipts
+Generate PO recommendations
+Key APIs:
+GET /api/purchase-orders - List POs
+POST /api/purchase-orders - Create PO
+PUT /api/purchase-orders/{id}/approve - Approve PO
+POST /api/purchase-orders/{id}/receive - Record receipt
+GET /api/recommendations/replenishment - Get replenishment recommendations
+2.2.4 Reporting & Analytics Service
+Responsibilities:
+Generate standard reports
+Provide dashboard data
+Support ad-hoc queries
+Export reports to Excel/PDF
+Calculate KPIs
+Key APIs:
+GET /api/reports/current-inventory - Current inventory report
+GET /api/reports/valuation - Inventory valuation
+GET /api/reports/variance - Reconciliation variance report
+GET /api/dashboard/summary - Dashboard KPIs
+POST /api/reports/export - Export report
+2.2.5 User Management Service Responsibilities:
+Authenticate users
+Manage user accounts
+Enforce role-based access control
+Handle session management
+
+
+Key APIs:
+POST /api/auth/login - User login
+POST /api/auth/logout - User logout
+GET /api/users - List users
+POST /api/users - Create user
+PUT /api/users/{id}/roles - Update user roles
+2.2.6 Integration Gateway Service Responsibilities:
+		Route requests to external systems
+Handle authentication for external APIs
+Implement retry logic and error handling
+Log integration activity
+Throttle requests to respect rate limits
+Key Functions:
+QuickBooks integration orchestration
+WMS integration orchestration
+Sales channel integration orchestration
+Webhook handling for real-time events
+2.3 Business Logic Layer
+Purpose: Implement core business rules and algorithms; ensure data integrity Components:
+2.3.1 Inventory Business Rules Engine Rules Implemented:
+FEFO allocation logic
+Negative inventory prevention
+Regional SKU availability enforcement
+Damaged/expired inventory handling
+Quarantine status management
+
+2.3.2 Replenishment Recommendation Engine Logic:
+Reorder point calculation: (Avg Daily Demand × Lead Time) + Safety Stock
+Transfer vs. purchase decision logic
+MOQ and case pack rounding
+Economic order quantity optimization (future enhancement)
+2.3.3 Purchase Order Validation Engine Validations:
+MOQ compliance
+Case pack rounding
+Supplier requirement enforcement
+Delivery date validation
+Budget checks (future enhancement)
+2.3.4 Alert & Notification Engine Alert Types:
+Stockout risk alerts
+Expiry alerts (4-month advance)
+Inventory variance alerts
+PO approval notifications
+Low inventory warnings
+Delivery Mechanisms:
+In-app dashboard alerts
+Email notifications (optional)
+SMS notifications (future enhancement)
+2.4 Data Access Layer
+Purpose: Abstract database operations; provide consistent data access interface Components:
+2.4.1 ORM (Object-Relational Mapping)
+Technology: Prisma (Node.js) 
+Benefits:
+Database-agnostic code
+Automatic query generation
+Transaction management
+Lazy loading and caching
+2.4.2 Repository Pattern
+Purpose: Centralize data access logic; enable unit testing Key Repositories:
+InventoryRepository
+ProductRepository
+WarehouseRepository
+SupplierRepository
+PurchaseOrderRepository
+TransferRepository
+UserRepository
+2.5 Data Layer
+Purpose: Persist and retrieve data efficiently
+Components:
+2.5.1 Operational Database
+Technology: PostgreSQL (recommended) or MySQL Schema Highlights:
+Products & SKUs
+Inventory (by SKU, location, lot/batch)
+Warehouses
+Suppliers
+Purchase Orders
+Transfers
+Users & Roles
+Forecasts
+Transactions & Audit Log
+
+3. Physical / Deployment Architecture
+3.1 Deployment Model
+Recommended: Cloud-based SaaS or PaaS deployment Cloud Provider Options:
+AWS (Amazon Web Services): Mature ecosystem, strong integration options
+Microsoft Azure: Excellent QuickBooks and Office 365 integration
+Google Cloud Platform (GCP): Cost-effective, strong analytics capabilities
+Rationale for Cloud:
+Scalability: Handle growth without infrastructure investment
+High Availability: Built-in redundancy and failover
+Reduced Operational Overhead: Managed services reduce IT burden
+Security: Enterprise-grade security controls
+Geographic Distribution: Multi-region deployment for data residency (US/Canada)
+3.2 Infrastructure Components
+3.3.1 Web / Application Tier
+Technology: AWS ECS (Elastic Container Service) or EKS (Kubernetes) Configuration:
+Containerization: Docker containers for portability
+Orchestration: Kubernetes (EKS) or AWS ECS for container management
+Auto-Scaling: Horizontal scaling based on CPU/memory utilization
+Load Balancing: Application Load Balancer (ALB) for traffic distribution
+Instances: Minimum 2 instances for high availability, scale up to 10+
+3.3.2 Database Tier
+Technology: AWS RDS PostgreSQL (Relational Database Service) Configuration:
+Multi-AZ Deployment: Primary and standby instances for high availability
+Instance Type: db.m5.large (2 vCPU, 8 GB RAM) - adjust based on load
+Storage: 100 GB SSD (General Purpose), auto-scaling up to 1 TB
+Backup: Automated daily backups, 7-day retention
+Read Replicas: Optional read replicas for reporting queries (future)
+3.3.3 Caching Layer
+Technology: AWS ElastiCache (Redis) Purpose:
+Session storage
+Application-level caching (frequently accessed data)
+Real-time dashboard data
+Configuration:
+Instance Type: cache.m5.large
+Replication: Multi-AZ for high availability
+3.3.4 File Storage
+Technology: AWS S3 (Simple Storage Service) Purpose:
+Report exports (Excel, PDF)
+System logs
+Backup storage
+Configuration:
+Bucket Policy: Private with role-based access
+Versioning: Enabled for critical files
+Lifecycle Policy: Transition to Glacier for long-term archival
+3.3.5 Background Job Processing
+Technology: AWS Lambda or AWS Batch Use Cases:
+Daily forecasting job
+Daily reconciliation job
+Scheduled report generation
+Alert processing
+3.3.6 Monitoring & Logging
+Technology: AWS CloudWatch, Datadog, or New Relic Metrics Monitored:
+Application performance (response time, error rate)
+Infrastructure health (CPU, memory, disk)
+Database performance (query time, connections)
+Integration health (API call success rate)
+4. Integration Architecture
+4.1 Integration Patterns
+4.1.1 API-Based Integration (RESTful)
+Used For: QuickBooks, Shopify, Amazon, Faire, Extensiv & Diamond WMS (if API available) Characteristics:
+Synchronous request-response
+JSON payload format
+OAuth 2.0 or API key authentication
+Rate limiting and throttling
+Retry logic for transient failures
+4.1.2 Webhook / Event-Driven Integration
+Used For: Sales channel order notifications, inventory updates Characteristics:
+Asynchronous push notifications
+IMS exposes webhook endpoints
+External systems push events to IMS
+Event queuing for processing (AWS SQS)
+4.1.3 File-Based Integration (Fallback)
+Used For: Systems without APIs (e.g., legacy Diamond WMS if needed) Characteristics:
+Scheduled file transfer (SFTP, S3)
+CSV or XML file format
+Batch processing (nightly or periodic)
+Manual reconciliation if real-time unavailable
+4.2 Integration Architecture Diagram
+
+4.3 Integration Details by System
+4.3.1 QuickBooks Online Integration
+Integration Method: REST API via OAuth 2.0
+Data Flow:
+		IMS → QuickBooks:
+Inventory quantities (real-time sync)
+Purchase Orders
+Inventory adjustments (Journal Entries)
+Transfer Journal Entries
+		QuickBooks → IMS:
+Product/SKU master data
+Supplier information
+Inventory valuation data
+Sync Frequency: Real-time or <5 minutes batch API Endpoints Used:
+/item - Inventory items
+/purchaseorder - Purchase orders
+/journalentry - Adjustments and transfers
+/account - Chart of accounts
+Challenges & Mitigations:
+		Rate Limits: QuickBooks API has strict rate limits
+		Mitigation: Implement intelligent batching, caching, and throttling
+		Data Model Differences: QuickBooks inventory model may differ from IMS
+		Mitigation: Mapping layer to translate between models
+		Authentication: OAuth tokens expire
+		Mitigation: Automatic token refresh mechanism
+4.3.2 Extensiv WMS Integration (Canada)
+Integration Method: REST API (assuming API available) Data Flow:
+		IMS → Extensiv:
+Customer orders for fulfillment
+Expected receipts (POs)
+		Transfer instructions
+		Extensiv → IMS:
+Inventory levels (real-time)
+Order fulfillment confirmations
+Receipt confirmations
+Sync Frequency: Real-time via webhooks (preferred) or <5 minutes polling
+Assumption: Extensiv provides REST API. If not, escalate for custom integration.
+4.3.3 Diamond Fulfillment WMS Integration (USA)
+Integration Method: Custom API or File-Based (TBD based on Diamond's capabilities) Data Flow:
+		IMS → Diamond:
+Customer orders
+Expected receipts
+		Diamond → IMS:
+Inventory levels
+Fulfillment confirmations
+Receipt confirmations
+Challenges:
+Current setup uses custom "inventory report website" by Aaron
+May lack standard API
+Mitigation:
+Option 1: Work with Diamond to provide API access
+Option 2: Custom integration with Diamond's system
+Option 3: File-based integration (SFTP or S3) as fallback
+4.3.4 Shopify Integration
+Integration Method: Shopify REST API & GraphQL API
+Data Flow:
+		IMS → Shopify:
+		Inventory level updates
+		Shopify → IMS:
+Customer orders (via webhook)
+Product catalog sync
+Sync Frequency: Real-time via webhooks API Endpoints Used:
+/inventory_levels - Update inventory
+/orders - Receive orders
+Webhooks: orders/create, inventory_levels/update
+4.3.5 Amazon (MWS / SP-API) Integration
+Integration Method: Amazon Marketplace Web Service (MWS) or Selling Partner API (SP-API) Data Flow:
+		IMS → Amazon:
+Inventory level updates
+Shipment confirmations
+		Amazon → IMS:
+Customer orders
+Inventory levels at FBA warehouses
+Sync Frequency: Polling every 5-15 minutes (Amazon rate limits) Challenges:
+Amazon API has strict rate limits
+Complex API with steep learning curve
+Different APIs for US and Canada
+Mitigation:
+Use Amazon SP-API (newer, more reliable)
+Implement intelligent polling and caching
+Leverage Amazon webhooks where available
+4.3.6 Faire Integration
+Integration Method: Faire API (REST) Data Flow:
+		IMS → Faire:
+		Inventory level updates
+		Faire → IMS:
+		Customer orders
+Sync Frequency: Real-time via webhooks
+4.4 Integration Error Handling Strategy
+4.4.1 Retry Logic
+Transient Errors: Retry up to 3 times with exponential backoff
+Permanent Errors: Log and alert for manual intervention
+4.4.2 Error Queue
+Failed integration requests stored in queue (AWS SQS)
+Manual retry or resolution by administrator
+4.4.3 Integration Health Dashboard
+Display integration status for each system (green/yellow/red)
+Show last successful sync time
+Alert on sync failures
+4.4.4 Circuit Breaker Pattern
+Temporarily disable integration if external system is down
+Prevent cascading failures
+Automatic retry after cooldown period
+
+5. Security Architecture
+5.1 Security Layers
+--Diagram
+5.2 Authentication & Authorization
+5.2.1 User Authentication
+Method: Username and password with optional MFA Password Policy:
+Minimum 12 characters
+Complexity: Uppercase, lowercase, number, special character
+Password expiration: 90 days
+Password history: Last 5 passwords cannot be reused
+Multi-Factor Authentication (MFA):
+Optional for initial deployment
+Recommended for admin users
+Time-based one-time passwords (TOTP) via authenticator app
+5.2.2 Role-Based Access Control (RBAC) Roles:
+Role
+Permissions
+System Administrator
+Full access to all modules, user management, system configuration
+Inventory Manager
+View/edit inventory, create transfers, generate reports
+PO Creator
+Create POs, view inventory, view forecasts
+PO Approver
+Approve/reject POs, all PO Creator permissions
+Forecast Editor
+Override forecasts, view forecasts
+Read-Only User
+View inventory, view reports (no edit permissions)
+
+
+Permission Matrix:
+Function
+Admin
+Inventory Manager
+PO Creator
+PO Approver
+Forecast Editor
+Read-Only
+View Inventory
+✓
+✓
+✓
+✓
+✓
+✓
+Edit Inventory
+✓
+✓
+✗
+✗
+✗
+✗
+Create PO
+✓
+✗
+✓
+✓
+✗
+✗
+Approve PO
+✓
+✗
+✗
+✓
+✗
+✗
+Edit Forecast
+✓
+✗
+✗
+✗
+✓
+✗
+Generate Reports
+✓
+✓
+✓
+✓
+✓
+✓
+User Management
+✓
+✗
+✗
+✗
+✗
+✗
+
+
+5.2.3 Session Management
+Session timeout: 30 minutes of inactivity
+Secure session tokens (HTTP-only, Secure flag)
+Session invalidation on logout
+Concurrent session limit: 3 per user
+5.3 Data Encryption
+5.3.1 Data in Transit
+Protocol: TLS 1.2 or higher
+Certificates: SSL/TLS certificates from trusted CA
+All API Communication: HTTPS only
+Database Connections: Encrypted connections
+5.3.2 Data at Rest
+Database: AWS RDS encryption enabled (AES-256)
+File Storage: S3 bucket encryption (AES-256)
+Backups: Encrypted backups
+Key Management: AWS KMS (Key Management Service)
+5.4 API Security
+5.4.1 Authentication
+Internal APIs: JWT (JSON Web Token) with short expiration
+External APIs: API keys or OAuth 2.0
+5.4.2 Rate Limiting
+Prevent abuse and DDoS attacks
+Limit: 100 requests per minute per user
+Throttling for exceeding limits
+5.4.3 Input Validation
+Validate all input parameters
+Sanitize input to prevent injection attacks
+Use parameterized queries for database access
+5.5 Audit Trail & Logging
+5.5.1 Audit Log (Future Enhancement) Events Logged:
+User login/logout
+Inventory adjustments
+PO approvals
+Forecast overrides
+User account changes
+Audit Log Schema:
+Timestamp
+User ID
+Action performed
+Affected entity (SKU, PO, etc.)
+Old value / New value
+IP address
+Retention: 1 year minimum (3 years recommended)
+5.5.2 System Logs Logs Captured:
+Application errors
+Integration failures
+Performance metrics
+Security events
+Log Management: AWS CloudWatch Logs or centralized logging (ELK stack)
+5.6 Compliance & Data Residency
+5.6.1 Data Residency
+Requirement: Support US and Canadian data residency Implementation:
+Option 1: Deploy separate instances in US and Canada regions
+Option 2: Single US instance with Canadian data replication (read replica)
+Recommended: Option 1 for full compliance
+5.6.2 Compliance Certifications (Future)
+ISO 27001: Information security management
+SOC 2 Type II: Security, availability, confidentiality
+PCI DSS: If credit card data handled (not applicable initially)
+
+6. Data Architecture
+6.1 Entity Relationship Overview Core Entities:
+Products / SKUs
+Inventory
+Warehouses / Locations
+Suppliers
+Purchase Orders
+Transfers
+Sales Orders
+Users
+Forecasts
+6.2 Key Entities & Attributes 6.2.1 Product
+
+6.2.2 Inventory
+
+
+Indexes:
+ProductID, WarehouseID (Composite index for fast lookup)
+ExpiryDate (for expiry alerts)
+Status (for filtering sellable inventory)
+6.2.3 Warehouse
+
+Records:
+Diamond Fulfillment (Chicago, USA)
+Kwiksave Warehouse (Toronto, Canada)
+Amazon FBA USA
+Amazon FBA Canada (future)
+6.2.4 Supplier
+
+6.2.5 SupplierProduct
+
+6.2.6 PurchaseOrder
+
+6.2.7 PurchaseOrderLine
+
+6.2.8 PurchaseOrderReceipt
+
+6.2.9 Transfer
+
+6.2.10 TransferLine
+
+6.2.11 SalesOrder
+
+6.2.12 SalesOrderLine
+
+6.2.13 Forecast
+
+6.2.14 InventoryTransaction
+
+
+
+6.2.15 User
+
+6.2.16 Role
+
+Predefined Roles:
+System Administrator
+Inventory Manager
+PO Creator
+PO Approver
+Forecast Editor
+Read-Only User
+6.3 Database Design Principles
+Normalization: 3NF (Third Normal Form) to reduce redundancy
+Referential Integrity: Foreign key constraints enforced
+Indexing Strategy: Indexes on frequently queried columns (SKU, ProductID, WarehouseID, dates)
+Audit Trail: Timestamps (CreatedDate, ModifiedDate) on all tables
+Soft Deletes: Use IsActive flags instead of hard deletes where appropriate
+Historical Data: Retain historical records for forecasting and analytics
+
+7. Technology Stack Recommendations
+7.1 Frontend
+Recommended: React.js 
+Justification:
+Modern, widely-adopted JavaScript frameworks
+Rich ecosystem and community support
+Component-based architecture for maintainability
+Excellent performance and user experience
+Additional Libraries:
+UI Framework: Material-UI, Ant Design, or Bootstrap for consistent design
+State Management: Redux 
+Charts/Graphs: Chart.js or D3.js for reporting visualizations
+HTTP Client: Axios for API calls
+7.2 Backend
+Recommended: Node.js with Express.js 
+Option 1: Node.js with Express.js
+		Pros: JavaScript across full stack, async/event-driven for integrations, fast development
+Cons: Less mature for enterprise-scale applications
+Option 2: .NET Core (C#)
+Pros: Enterprise-grade, excellent performance, strong typing, Microsoft ecosystem integration
+Cons: Steeper learning curve, Windows development (but cross-platform now)
+Option 3: Python with Django/Flask
+Pros: Excellent for data science/forecasting, simple syntax, rich libraries
+Cons: Slower performance than Node.js or .NET
+Recommendation: .NET Core for enterprise robustness OR Node.js for rapid development
+7.3 Database
+Recommended: PostgreSQL
+Justification:
+Open-source and cost-effective
+ACID compliance for data integrity
+Excellent performance and scalability
+Rich feature set (JSONB, full-text search, geospatial)
+Strong AWS RDS support
+Alternative: MySQL (if team more familiar)
+7.4 Cloud Platform
+Recommended: AWS (Amazon Web Services)
+Justification:
+Most mature cloud platform
+Comprehensive service offerings
+Strong integration ecosystem
+Excellent documentation and community support
+Alternative: Microsoft Azure (strong QuickBooks integration) or Google Cloud Platform
+
+7.5 Integration
+Recommended Tools:
+API Gateway: AWS API Gateway
+Message Queue: AWS SQS (Simple Queue Service)
+Event Streaming: AWS EventBridge or Apache Kafka (for high-volume)
+ETL/Integration Platform: AWS Glue, Apache Airflow, or Zapier (low-code)
+7.6 DevOps & CI/CD Recommended:
+Version Control: Git (GitHub or GitLab)
+CI/CD: GitHub Actions, GitLab CI, or AWS CodePipeline
+Infrastructure as Code: Terraform or AWS CloudFormation
+Containerization: Docker
+Orchestration: Kubernetes (EKS) or AWS ECS
+7.7 Monitoring & Logging Recommended:
+Application Monitoring: AWS CloudWatch, Datadog, or New Relic
+Log Aggregation: AWS CloudWatch Logs or ELK Stack (Elasticsearch, Logstash, Kibana)
+Error Tracking: Sentry or Rollbar
+Uptime Monitoring: Pingdom or UptimeRobot
+8. Scalability & Performance Considerations
+8.1 Horizontal Scalability
+Strategy: Auto-scaling application tier based on load Implementation:
+Containerized application (Docker)
+Orchestration via Kubernetes or AWS ECS
+Auto-scaling policies based on CPU/memory utilization
+Load balancer distributes traffic across instances
+Benefits:
+Handle traffic spikes during promotions or seasonal peaks
+		Cost-effective: Scale down during low-traffic periods
+8.2 Database Optimization Strategies:
+Indexing: Index frequently queried columns (ProductID, WarehouseID, SKU, dates)
+Query Optimization: Use EXPLAIN to analyze and optimize slow queries
+Connection Pooling: Limit database connections to prevent overload
+Read Replicas: Offload reporting and analytics queries to read replicas
+Caching: Cache frequently accessed data (product master, warehouse list) in Redis
+8.3 Caching Strategy Levels of Caching:
+Application Cache (Redis):
+Product master data
+Warehouse locations
+User sessions
+Dashboard summary data
+Database Query Cache:
+Enable query caching for repeated queries
+Cache expiration: 5-15 minutes
+CDN (CloudFront):
+Cache static assets (CSS, JS, images)
+Reduce latency for global users
+8.4 Asynchronous Processing Use Cases:
+Daily forecasting job
+Daily reconciliation job
+Bulk data imports
+Report generation
+Implementation:
+Background job queue (AWS Lambda, AWS Batch, or Celery)
+Scheduled jobs via cron or AWS EventBridge
+Event-driven processing for real-time alerts
+Benefits:
+Offload heavy processing from main application
+Improve user experience (no waiting for long tasks)
+8.5 API Rate Limiting & Throttling Purpose: Prevent abuse and ensure fair usage Implementation:
+Rate limit: 100 requests/minute per user
+Throttle excessive requests with HTTP 429 (Too Many Requests)
+API key-based rate limiting for external integrations
+
+
+
+8.6 Performance Targets
+Metric
+Target
+Page Load Time
+<3 seconds
+API Response Time (95th percentile)
+<500ms
+Database Query Time (95th percentile)
+<100ms
+Dashboard Refresh Time
+<5 seconds
+Report Generation Time
+<10 seconds (standard reports)
+System Uptime
+99.5% during business hours
+Concurrent Users Supported
+50+
+
+
+END OF SYSTEM ARCHITECTURE DESIGN
+This document is confidential and proprietary. Distribution is limited to authorized personnel only.

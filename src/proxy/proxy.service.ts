@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -19,8 +19,8 @@ export class ProxyService {
   private readonly breakers: Map<string, { fire: (url: string, config: AxiosRequestConfig) => Promise<unknown> }> = new Map();
 
   constructor(
-    private http: HttpService,
-    private config: ConfigService,
+    @Inject(HttpService) private http: HttpService,
+    @Inject(ConfigService) private config: ConfigService,
   ) {
     this.userServiceUrl = this.config.get<string>('userServiceUrl', 'http://localhost:3001');
     this.timeout = this.config.get<number>('requestTimeout', 30000);

@@ -8,6 +8,7 @@ import {
   UseGuards,
   Logger,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { ProxyService } from './proxy.service';
@@ -20,6 +21,7 @@ function generateCorrelationId(): string {
 
 const USER_SERVICE_PREFIX = '/api/v1';
 
+@ApiTags('root')
 @Controller()
 export class ProxyController {
   private readonly logger = new Logger(ProxyController.name);
@@ -27,6 +29,8 @@ export class ProxyController {
   constructor(private readonly proxy: ProxyService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Service info and endpoint list' })
+  @ApiResponse({ status: 200, description: 'Gateway info' })
   root() {
     return {
       service: 'API Gateway',
