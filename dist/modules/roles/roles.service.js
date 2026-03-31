@@ -35,8 +35,7 @@ let RolesService = class RolesService {
     }
     async findForRegistration() {
         const roles = await this.roleRepo.find({
-            where: { roleName: (0, typeorm_2.Not)('System Administrator') },
-            select: ['roleId', 'roleName'],
+            select: ['roleId', 'roleName', 'roleAlt'],
             order: { roleName: 'ASC' },
         });
         return roles;

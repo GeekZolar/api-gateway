@@ -26,8 +26,8 @@ export class RolesService {
 
   async findForRegistration(): Promise<{ roleId: string; roleName: string }[]> {
     const roles = await this.roleRepo.find({
-      where: { roleName: Not('System Administrator') },
-      select: ['roleId', 'roleName'],
+      //where: { roleName: Not('System Administrator') },
+      select: ['roleId', 'roleName', 'roleAlt'],
       order: { roleName: 'ASC' },
     });
     return roles;

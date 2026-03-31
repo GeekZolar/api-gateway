@@ -19,6 +19,7 @@ exports.default = () => ({
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
+        schema: process.env.DB_SCHEMA || 'public',
         ssl: parseBool(process.env.DB_SSL),
         synchronize: parseBool(process.env.DB_SYNCHRONIZE),
         logging: parseBool(process.env.DB_LOGGING),

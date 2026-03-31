@@ -16,6 +16,9 @@ export class Role {
   @Column({ name: 'role_name', type: 'varchar', length: 100, unique: true })
   roleName: string;
 
+  @Column({ name: 'role_alt', type: 'varchar', length: 50, unique: true })
+  roleAlt: string;
+
   @Column({ name: 'description', type: 'text', nullable: true })
   description: string | null;
 

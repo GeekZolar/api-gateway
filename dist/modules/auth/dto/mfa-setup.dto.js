@@ -17,7 +17,7 @@ class MfaSetupDto {
 exports.MfaSetupDto = MfaSetupDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Account label shown in the authenticator app (e.g. username or email)',
+        description: 'User email address',
         example: 'admin@example.com',
         maxLength: 64,
         minLength: 1,
@@ -27,5 +27,5 @@ __decorate([
     (0, class_validator_1.MinLength)(1),
     (0, class_validator_1.MaxLength)(64),
     __metadata("design:type", String)
-], MfaSetupDto.prototype, "accountName", void 0);
+], MfaSetupDto.prototype, "emailAddress", void 0);
 //# sourceMappingURL=mfa-setup.dto.js.map

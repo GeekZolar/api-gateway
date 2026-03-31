@@ -36,6 +36,10 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "passwordHash", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ name: 'isdefault_password', type: 'boolean', default: false }),
+    __metadata("design:type", Boolean)
+], User.prototype, "isDefaultPassword", void 0);
+__decorate([
     (0, typeorm_1.Column)({ name: 'first_name', type: 'varchar', length: 100 }),
     __metadata("design:type", String)
 ], User.prototype, "firstName", void 0);

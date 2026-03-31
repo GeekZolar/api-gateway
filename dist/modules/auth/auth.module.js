@@ -27,6 +27,7 @@ let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
+    (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, password_history_entity_1.PasswordHistory, password_reset_token_entity_1.PasswordResetToken]),
@@ -44,7 +45,7 @@ exports.AuthModule = AuthModule = __decorate([
         ],
         controllers: [auth_controller_1.AuthController],
         providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, refresh_token_strategy_1.RefreshTokenStrategy, password_service_1.PasswordService, mfa_service_1.MfaService],
-        exports: [auth_service_1.AuthService, password_service_1.PasswordService, jwt_1.JwtModule],
+        exports: [auth_service_1.AuthService, password_service_1.PasswordService, jwt_1.JwtModule, passport_1.PassportModule],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

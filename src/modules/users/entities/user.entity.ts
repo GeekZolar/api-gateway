@@ -27,6 +27,8 @@ export class User {
   @Column({ name: 'password_hash', type: 'varchar', length: 255 })
   @Exclude()
   passwordHash: string;
+  @Column({ name: 'isdefault_password', type: 'boolean', default: false })
+  isDefaultPassword: boolean;
 
   @Column({ name: 'first_name', type: 'varchar', length: 100 })
   firstName: string;

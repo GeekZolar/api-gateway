@@ -28,8 +28,8 @@ export class PasswordService {
   }
 
   validateStrength(password: string): { valid: boolean; message?: string } {
-    if (password.length < 12) {
-      return { valid: false, message: 'Password must be at least 12 characters' };
+    if (password.length < 8) {
+      return { valid: false, message: 'Password must be at least 8 characters' };
     }
     if (!/[a-z]/.test(password)) {
       return { valid: false, message: 'Password must contain lowercase' };

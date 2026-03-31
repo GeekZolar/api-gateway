@@ -6,6 +6,7 @@ declare const _default: () => {
         username: string | undefined;
         password: string | undefined;
         database: string | undefined;
+        schema: string;
         ssl: boolean | undefined;
         synchronize: boolean | undefined;
         logging: boolean | undefined;

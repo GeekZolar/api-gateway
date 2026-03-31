@@ -20,6 +20,7 @@ const users_module_1 = require("./modules/users/users.module");
 const roles_module_1 = require("./modules/roles/roles.module");
 const audit_module_1 = require("./modules/audit/audit.module");
 const health_module_1 = require("./modules/health/health.module");
+const utility_module_1 = require("./modules/utility/utility.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +40,7 @@ exports.AppModule = AppModule = __decorate([
                     username: config.get('database.username'),
                     password: config.get('database.password'),
                     database: config.get('database.database'),
+                    schema: config.get('database.schema', 'public'),
                     ssl: config.get('database.ssl'),
                     synchronize: config.get('database.synchronize'),
                     logging: config.get('database.logging'),
@@ -68,6 +70,7 @@ exports.AppModule = AppModule = __decorate([
             roles_module_1.RolesModule,
             audit_module_1.AuditModule,
             health_module_1.HealthModule,
+            utility_module_1.UtilityModule,
         ],
     })
 ], AppModule);

@@ -74,6 +74,32 @@ export class AuthService {
       });
       throw new UnauthorizedException('Invalid credentials');
     }
+    if (user && user.isDefaultPassword) {
+      //const changeMfaToken = this.generateMfaVerificationToken(user.userId, ipAddress, userAgent);
+      const session = await this.sessionsService.createPlaceholder(user.userId, ipAddress, userAgent);
+      const refreshToken = this.generateRefreshToken(user.userId, session.sessionId);
+      await this.sessionsService.setRefreshTokenHash(session.sessionId, refreshToken);
+      const accessToken = this.generateAccessToken(user, session.sessionId);
+      await this.auditService.log({
+        action: 'LOGIN',
+        entityType: 'User',
+        status: 'FAILED',
+        errorMessage: 'Default password',
+        ipAddress: ipAddress || '',
+        userAgent: userAgent || '',
+      });
+      return {
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        mfaToken: "",
+        expiresIn: 0,
+        mfaRequired: false,
+        mfaEnabled: false,
+        isDefaultPassword: true,
+        user: null,
+        message: 'Default password. Please change your password first.',
+      };
+    }
 
     if (user.accountLockedUntil && user.accountLockedUntil > new Date()) {
       await this.auditService.log({
@@ -155,6 +181,7 @@ export class AuthService {
       mfaToken: '',
       expiresIn: ACCESS_TOKEN_EXPIRY_SECONDS,
       mfaRequired: false,
+      mfaEnabled: false,
       user: this.toUserResponse(user),
       message: 'Login successful',
     };
@@ -228,9 +255,9 @@ export class AuthService {
   }
 
   async mfaSetup(
-    user: User,    accountName: string // options: { issuer: string; accountName: string; includeQrCode?: boolean },
+    user: User,    emailAddress: string // options: { issuer: string; accountName: string; includeQrCode?: boolean },
   ) {
-    if (user.email !== accountName) throw new BadRequestException('Account name does not match');
+    if (user.email !== emailAddress) throw new BadRequestException('Email address does not match');
     if (user.mfaEnabled) throw new BadRequestException('MFA already enabled');
     const includeQrCode = this.config.get<boolean>('mfaIncludeQrCode', true);
     const issuer = this.config.get<string>('mfaIssuer', 'S&R IMS');
@@ -242,11 +269,8 @@ export class AuthService {
     const qrCodeUrl = includeQrCode ? await this.mfaService.getQrCodeUrl(otpauthUrl) : undefined;
     const backupCodes = this.mfaService.generateBackupCodes();
     const encryptedSecret = this.mfaService.encryptSecret(secret);
-    await this.userRepo.update(user.userId, { mfaSecret: encryptedSecret, mfaEnabled: true });
-    return { secret, otpauthUrl, qrCodeUrl, backupCodes,
-      mfaEnabled: true,
-      mfaSecret: encryptedSecret,
-    };
+    await this.userRepo.update(user.userId, { mfaSecret: encryptedSecret });
+    return {qrCodeUrl, mfaEnabled: true};
   }
 
   async mfaVerify(userId: string, code: string) {
@@ -258,6 +282,17 @@ export class AuthService {
     }
     await this.userRepo.update(userId, { mfaEnabled: true });
     return { verified: true, message: 'MFA successfully enabled' };
+  }
+
+  async mfaVerifyAndDisable(userId: string, code: string) {
+    const user = await this.userRepo.findOne({ where: { userId }, relations: ['role'] });
+    if (!user || !user.mfaSecret || !user.mfaEnabled) throw new BadRequestException('MFA not set up or not enabled');
+    const secret = this.mfaService.decryptSecret(user.mfaSecret);
+    if (!this.mfaService.verifyToken(secret, code)) {
+      throw new UnauthorizedException('Invalid code');
+    }
+    await this.userRepo.update(userId, { mfaEnabled: false });
+    return { verified: true, message: 'MFA successfully disabled' };
   }
 
   async verifyMfaAndLogin(
@@ -358,6 +393,7 @@ export class AuthService {
       refreshToken,
       expiresIn: ACCESS_TOKEN_EXPIRY_SECONDS,
       mfaRequired: false,
+      mfaEnabled: true,
       user: this.toUserResponse(user),
     };
   }
@@ -431,6 +467,7 @@ export class AuthService {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role?.roleName,
+      roleAlt: user.role?.roleAlt,
       permissions: user.role?.permissions || {},
     };
   }

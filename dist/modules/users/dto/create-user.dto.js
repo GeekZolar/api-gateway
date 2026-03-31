@@ -32,7 +32,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(12),
+    (0, class_validator_1.MinLength)(8),
     (0, class_validator_1.Matches)(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, { message: 'Password must contain uppercase, lowercase, number and special character (@$!%*?&)' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);

@@ -51,10 +51,13 @@ let AuthController = class AuthController {
         return this.authService.logout(userId, sessionId);
     }
     async mfaSetup(user, dto) {
-        return this.authService.mfaSetup(user, dto.accountName);
+        return this.authService.mfaSetup(user, dto.emailAddress);
     }
     async mfaVerify(userId, dto) {
         return this.authService.mfaVerify(userId, dto.code);
+    }
+    async mfaVerifyAndDisable(userId, dto) {
+        return this.authService.mfaVerifyAndDisable(userId, dto.code);
     }
     async passwordResetRequest(dto, req) {
         return this.authService.passwordResetRequest(dto.email, req.ip);
@@ -134,6 +137,16 @@ __decorate([
     __metadata("design:paramtypes", [String, mfa_verify_dto_1.MfaVerifyDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "mfaVerify", null);
+__decorate([
+    (0, common_1.Post)('mfa/verify-disable'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'Verify MFA and disable' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)('userId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, mfa_verify_dto_1.MfaVerifyDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "mfaVerifyAndDisable", null);
 __decorate([
     (0, common_1.Post)('password-reset/request'),
     (0, throttler_1.Throttle)({ default: { limit: 3, ttl: 3600000 } }),

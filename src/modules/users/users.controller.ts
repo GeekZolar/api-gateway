@@ -9,7 +9,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -28,7 +28,7 @@ import { hasPermission } from '../../utils/validators.util';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
+  @Post('create')
   @ApiOperation({ summary: 'Create user (registration)' })
   async create(@Body() dto: CreateUserDto, @Req() req: RequestWithUser) {
     const createdBy = req.user?.userId;
@@ -37,6 +37,7 @@ export class UsersController {
 
   @Patch(':userId/approve')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('users.approve')
   @ApiOperation({ summary: 'Approve user' })
   async approve(
@@ -89,6 +90,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
   @RequirePermissions('users.read')
   @ApiOperation({ summary: 'List users with pagination' })
   async findAll(@Query() query: UserQueryDto) {

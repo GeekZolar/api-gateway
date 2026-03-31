@@ -15,7 +15,7 @@ export class MfaSetupDto {
   // issuer: string;
 
   @ApiProperty({
-    description: 'Account label shown in the authenticator app (e.g. username or email)',
+    description: 'User email address',
     example: 'admin@example.com',
     maxLength: 64,
     minLength: 1,
@@ -24,7 +24,7 @@ export class MfaSetupDto {
   @IsString()
   @MinLength(1)
   @MaxLength(64)
-  accountName: string;
+  emailAddress: string;
 
   // @ApiPropertyOptional({
   //   description: 'Whether to include a QR code data URL in the response (default: true)',

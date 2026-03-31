@@ -47,6 +47,7 @@ let UsersService = class UsersService {
             username: dto.username,
             email: dto.email,
             passwordHash,
+            isDefaultPassword: true,
             firstName: dto.firstName,
             lastName: dto.lastName,
             roleId: dto.roleId,
@@ -73,6 +74,7 @@ let UsersService = class UsersService {
             lastName: saved.lastName,
             isActive: saved.isActive,
             isApproved: saved.isApproved,
+            isDefaultPassword: saved.isDefaultPassword,
             message: 'User created successfully. Pending approval.',
         };
     }
@@ -249,6 +251,7 @@ let UsersService = class UsersService {
             throw new common_1.BadRequestException('Cannot reuse one of your last 5 passwords');
         await this.passwordService.addToHistory(userId, user.passwordHash);
         user.passwordHash = newHash;
+        user.isDefaultPassword = false;
         user.passwordLastChangedDate = new Date();
         await this.userRepo.save(user);
         await this.auditService.log({

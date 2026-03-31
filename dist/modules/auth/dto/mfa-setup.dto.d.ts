@@ -1,3 +1,3 @@
 export declare class MfaSetupDto {
-    accountName: string;
+    emailAddress: string;
 }

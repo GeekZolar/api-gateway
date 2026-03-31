@@ -11,6 +11,7 @@ import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { HealthModule } from './modules/health/health.module';
+import { UtilityModule } from './modules/utility/utility.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { HealthModule } from './modules/health/health.module';
         username: config.get('database.username'),
         password: config.get('database.password'),
         database: config.get('database.database'),
+        schema: config.get('database.schema', 'public'),
         ssl: config.get('database.ssl'),
         synchronize: config.get('database.synchronize'),
         logging: config.get('database.logging'),
@@ -56,6 +58,7 @@ import { HealthModule } from './modules/health/health.module';
     RolesModule,
     AuditModule,
     HealthModule,
+    UtilityModule,
   ],
 })
 export class AppModule {}

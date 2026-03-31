@@ -25,6 +25,7 @@ async function run() {
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
+        schema: process.env.DB_SCHEMA || 'public',
         ssl: parseBool(process.env.DB_SSL),
         synchronize: parseBool(process.env.DB_SYNCHRONIZE),
         entities: [__dirname + '/../../modules/**/*.entity{.ts,.js}'],

@@ -85,7 +85,7 @@ export class AuthController {
       'Requires the **access token** in the Authorization header (Bearer). Use the accessToken from login, or from POST /auth/mfa/verify-login if login returned mfaRequired.',
   })
   async mfaSetup(@CurrentUser() user: User, @Body() dto: MfaSetupDto) {
-    return this.authService.mfaSetup(user, dto.accountName as string);
+    return this.authService.mfaSetup(user, dto.emailAddress as string);
   }
 
   @Post('mfa/verify')
@@ -93,6 +93,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Verify MFA and enable' })
   async mfaVerify(@CurrentUser('userId') userId: string, @Body() dto: MfaVerifyDto) {
     return this.authService.mfaVerify(userId, dto.code);
+  }
+
+  @Post('mfa/verify-disable')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Verify MFA and disable' })
+  async mfaVerifyAndDisable(@CurrentUser('userId') userId: string, @Body() dto: MfaVerifyDto) {
+    return this.authService.mfaVerifyAndDisable(userId, dto.code);
   }
 
   @Post('password-reset/request')

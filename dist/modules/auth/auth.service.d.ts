@@ -26,6 +26,8 @@ export declare class AuthService {
         mfaToken: string;
         expiresIn: number;
         mfaRequired: boolean;
+        mfaEnabled: boolean;
+        isDefaultPassword: boolean;
         user: null;
         message: string;
     } | {
@@ -34,6 +36,17 @@ export declare class AuthService {
         mfaToken: string;
         expiresIn: number;
         mfaRequired: boolean;
+        user: null;
+        message: string;
+        mfaEnabled?: undefined;
+        isDefaultPassword?: undefined;
+    } | {
+        accessToken: string;
+        refreshToken: string;
+        mfaToken: string;
+        expiresIn: number;
+        mfaRequired: boolean;
+        mfaEnabled: boolean;
         user: {
             userId: string;
             username: string;
@@ -41,9 +54,11 @@ export declare class AuthService {
             firstName: string;
             lastName: string;
             role: string;
+            roleAlt: string;
             permissions: Record<string, string[]>;
         };
         message: string;
+        isDefaultPassword?: undefined;
     }>;
     private generateAccessToken;
     private generateRefreshToken;
@@ -56,15 +71,15 @@ export declare class AuthService {
     logout(userId: string, sessionId: string): Promise<{
         message: string;
     }>;
-    mfaSetup(user: User, accountName: string): Promise<{
-        secret: string;
-        otpauthUrl: string;
+    mfaSetup(user: User, emailAddress: string): Promise<{
         qrCodeUrl: string | undefined;
-        backupCodes: string[];
         mfaEnabled: boolean;
-        mfaSecret: string;
     }>;
     mfaVerify(userId: string, code: string): Promise<{
+        verified: boolean;
+        message: string;
+    }>;
+    mfaVerifyAndDisable(userId: string, code: string): Promise<{
         verified: boolean;
         message: string;
     }>;
@@ -73,6 +88,7 @@ export declare class AuthService {
         refreshToken: string;
         expiresIn: number;
         mfaRequired: boolean;
+        mfaEnabled: boolean;
         user: {
             userId: string;
             username: string;
@@ -80,6 +96,7 @@ export declare class AuthService {
             firstName: string;
             lastName: string;
             role: string;
+            roleAlt: string;
             permissions: Record<string, string[]>;
         };
     }>;

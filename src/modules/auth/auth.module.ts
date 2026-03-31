@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,6 +15,7 @@ import { MfaService } from './services/mfa.service';
 import { SessionsModule } from '../sessions/sessions.module';
 import { AuditModule } from '../audit/audit.module';
 
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, PasswordHistory, PasswordResetToken]),
@@ -32,6 +33,6 @@ import { AuditModule } from '../audit/audit.module';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshTokenStrategy, PasswordService, MfaService],
-  exports: [AuthService, PasswordService, JwtModule],
+  exports: [AuthService, PasswordService, JwtModule, PassportModule],
 })
 export class AuthModule {}

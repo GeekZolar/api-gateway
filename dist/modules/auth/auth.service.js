@@ -71,6 +71,31 @@ let AuthService = class AuthService {
             });
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
+        if (user && user.isDefaultPassword) {
+            const session = await this.sessionsService.createPlaceholder(user.userId, ipAddress, userAgent);
+            const refreshToken = this.generateRefreshToken(user.userId, session.sessionId);
+            await this.sessionsService.setRefreshTokenHash(session.sessionId, refreshToken);
+            const accessToken = this.generateAccessToken(user, session.sessionId);
+            await this.auditService.log({
+                action: 'LOGIN',
+                entityType: 'User',
+                status: 'FAILED',
+                errorMessage: 'Default password',
+                ipAddress: ipAddress || '',
+                userAgent: userAgent || '',
+            });
+            return {
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                mfaToken: "",
+                expiresIn: 0,
+                mfaRequired: false,
+                mfaEnabled: false,
+                isDefaultPassword: true,
+                user: null,
+                message: 'Default password. Please change your password first.',
+            };
+        }
         if (user.accountLockedUntil && user.accountLockedUntil > new Date()) {
             await this.auditService.log({
                 userId: user.userId,
@@ -138,6 +163,7 @@ let AuthService = class AuthService {
             mfaToken: '',
             expiresIn: constants_1.ACCESS_TOKEN_EXPIRY_SECONDS,
             mfaRequired: false,
+            mfaEnabled: false,
             user: this.toUserResponse(user),
             message: 'Login successful',
         };
@@ -193,9 +219,9 @@ let AuthService = class AuthService {
         await this.sessionsService.revokeSession(sessionId, userId);
         return { message: 'Successfully logged out' };
     }
-    async mfaSetup(user, accountName) {
-        if (user.email !== accountName)
-            throw new common_1.BadRequestException('Account name does not match');
+    async mfaSetup(user, emailAddress) {
+        if (user.email !== emailAddress)
+            throw new common_1.BadRequestException('Email address does not match');
         if (user.mfaEnabled)
             throw new common_1.BadRequestException('MFA already enabled');
         const includeQrCode = this.config.get('mfaIncludeQrCode', true);
@@ -208,11 +234,8 @@ let AuthService = class AuthService {
         const qrCodeUrl = includeQrCode ? await this.mfaService.getQrCodeUrl(otpauthUrl) : undefined;
         const backupCodes = this.mfaService.generateBackupCodes();
         const encryptedSecret = this.mfaService.encryptSecret(secret);
-        await this.userRepo.update(user.userId, { mfaSecret: encryptedSecret, mfaEnabled: true });
-        return { secret, otpauthUrl, qrCodeUrl, backupCodes,
-            mfaEnabled: true,
-            mfaSecret: encryptedSecret,
-        };
+        await this.userRepo.update(user.userId, { mfaSecret: encryptedSecret });
+        return { qrCodeUrl, mfaEnabled: true };
     }
     async mfaVerify(userId, code) {
         const user = await this.userRepo.findOne({ where: { userId }, relations: ['role'] });
@@ -224,6 +247,17 @@ let AuthService = class AuthService {
         }
         await this.userRepo.update(userId, { mfaEnabled: true });
         return { verified: true, message: 'MFA successfully enabled' };
+    }
+    async mfaVerifyAndDisable(userId, code) {
+        const user = await this.userRepo.findOne({ where: { userId }, relations: ['role'] });
+        if (!user || !user.mfaSecret || !user.mfaEnabled)
+            throw new common_1.BadRequestException('MFA not set up or not enabled');
+        const secret = this.mfaService.decryptSecret(user.mfaSecret);
+        if (!this.mfaService.verifyToken(secret, code)) {
+            throw new common_1.UnauthorizedException('Invalid code');
+        }
+        await this.userRepo.update(userId, { mfaEnabled: false });
+        return { verified: true, message: 'MFA successfully disabled' };
     }
     async verifyMfaAndLogin(mfaToken, mfaCode, ipAddress, userAgent) {
         let payload;
@@ -302,6 +336,7 @@ let AuthService = class AuthService {
             refreshToken,
             expiresIn: constants_1.ACCESS_TOKEN_EXPIRY_SECONDS,
             mfaRequired: false,
+            mfaEnabled: true,
             user: this.toUserResponse(user),
         };
     }
@@ -370,6 +405,7 @@ let AuthService = class AuthService {
             firstName: user.firstName,
             lastName: user.lastName,
             role: user.role?.roleName,
+            roleAlt: user.role?.roleAlt,
             permissions: user.role?.permissions || {},
         };
     }

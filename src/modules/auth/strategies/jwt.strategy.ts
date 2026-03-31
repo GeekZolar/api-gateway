@@ -14,22 +14,32 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  validate(payload: JwtPayload & { type?: string }) {
+  validate(
+    payload: JwtPayload & {
+      type?: string;
+      session_id?: string;
+    },
+  ) {
     if (payload.type === 'mfa-verification') {
       throw new UnauthorizedException(
         'This endpoint requires an access token. Complete MFA verification first: POST /auth/mfa/verify-login with mfaToken and mfaCode to get an access token.',
       );
     }
-    if (!payload.sub || !payload.sessionId) {
+    const sessionId = payload.sessionId ?? payload.session_id;
+    const sub =
+      payload.sub !== undefined && payload.sub !== null
+        ? String(payload.sub)
+        : undefined;
+    if (!sub || !sessionId) {
       throw new UnauthorizedException('Invalid or expired token');
     }
     return {
-      userId: payload.sub,
+      userId: sub,
       username: payload.username,
       email: payload.email,
       role: payload.role,
       permissions: payload.permissions || {},
-      sessionId: payload.sessionId,
+      sessionId,
     };
   }
 }

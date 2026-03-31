@@ -6,6 +6,7 @@ export declare class User {
     username: string;
     email: string;
     passwordHash: string;
+    isDefaultPassword: boolean;
     firstName: string;
     lastName: string;
     roleId: string;

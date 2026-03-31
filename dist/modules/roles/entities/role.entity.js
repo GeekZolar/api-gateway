@@ -24,6 +24,10 @@ __decorate([
     __metadata("design:type", String)
 ], Role.prototype, "roleName", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ name: 'role_alt', type: 'varchar', length: 50, unique: true }),
+    __metadata("design:type", String)
+], Role.prototype, "roleAlt", void 0);
+__decorate([
     (0, typeorm_1.Column)({ name: 'description', type: 'text', nullable: true }),
     __metadata("design:type", Object)
 ], Role.prototype, "description", void 0);

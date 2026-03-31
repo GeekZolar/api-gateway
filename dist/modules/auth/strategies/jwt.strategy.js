@@ -26,16 +26,20 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         if (payload.type === 'mfa-verification') {
             throw new common_1.UnauthorizedException('This endpoint requires an access token. Complete MFA verification first: POST /auth/mfa/verify-login with mfaToken and mfaCode to get an access token.');
         }
-        if (!payload.sub || !payload.sessionId) {
+        const sessionId = payload.sessionId ?? payload.session_id;
+        const sub = payload.sub !== undefined && payload.sub !== null
+            ? String(payload.sub)
+            : undefined;
+        if (!sub || !sessionId) {
             throw new common_1.UnauthorizedException('Invalid or expired token');
         }
         return {
-            userId: payload.sub,
+            userId: sub,
             username: payload.username,
             email: payload.email,
             role: payload.role,
             permissions: payload.permissions || {},
-            sessionId: payload.sessionId,
+            sessionId,
         };
     }
 };

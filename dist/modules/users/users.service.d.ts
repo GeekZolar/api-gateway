@@ -22,6 +22,7 @@ export declare class UsersService {
         lastName: string;
         isActive: boolean;
         isApproved: boolean;
+        isDefaultPassword: boolean;
         message: string;
     }>;
     approve(userId: string, approvedBy: string, ipAddress?: string, userAgent?: string): Promise<{

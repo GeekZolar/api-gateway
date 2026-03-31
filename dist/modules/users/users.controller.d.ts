@@ -16,6 +16,7 @@ export declare class UsersController {
         lastName: string;
         isActive: boolean;
         isApproved: boolean;
+        isDefaultPassword: boolean;
         message: string;
     }>;
     approve(userId: string, approvedBy: string, req: RequestWithUser): Promise<{

@@ -56,7 +56,7 @@ let UsersController = class UsersController {
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Post)('create'),
     (0, swagger_1.ApiOperation)({ summary: 'Create user (registration)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -67,6 +67,7 @@ __decorate([
 __decorate([
     (0, common_1.Patch)(':userId/approve'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, permissions_decorator_1.RequirePermissions)('users.approve'),
     (0, swagger_1.ApiOperation)({ summary: 'Approve user' }),
     __param(0, (0, common_1.Param)('userId')),
@@ -105,6 +106,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, permissions_decorator_1.RequirePermissions)('users.read'),
     (0, swagger_1.ApiOperation)({ summary: 'List users with pagination' }),
     __param(0, (0, common_1.Query)()),

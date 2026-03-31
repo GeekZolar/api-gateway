@@ -16,6 +16,8 @@ export declare class AuthController {
         mfaToken: string;
         expiresIn: number;
         mfaRequired: boolean;
+        mfaEnabled: boolean;
+        isDefaultPassword: boolean;
         user: null;
         message: string;
     } | {
@@ -24,6 +26,17 @@ export declare class AuthController {
         mfaToken: string;
         expiresIn: number;
         mfaRequired: boolean;
+        user: null;
+        message: string;
+        mfaEnabled?: undefined;
+        isDefaultPassword?: undefined;
+    } | {
+        accessToken: string;
+        refreshToken: string;
+        mfaToken: string;
+        expiresIn: number;
+        mfaRequired: boolean;
+        mfaEnabled: boolean;
         user: {
             userId: string;
             username: string;
@@ -31,15 +44,18 @@ export declare class AuthController {
             firstName: string;
             lastName: string;
             role: string;
+            roleAlt: string;
             permissions: Record<string, string[]>;
         };
         message: string;
+        isDefaultPassword?: undefined;
     }>;
     verifyMfaAndLogin(dto: MfaLoginVerifyDto, req: RequestWithUser): Promise<{
         accessToken: string;
         refreshToken: string;
         expiresIn: number;
         mfaRequired: boolean;
+        mfaEnabled: boolean;
         user: {
             userId: string;
             username: string;
@@ -47,6 +63,7 @@ export declare class AuthController {
             firstName: string;
             lastName: string;
             role: string;
+            roleAlt: string;
             permissions: Record<string, string[]>;
         };
     }>;
@@ -59,14 +76,14 @@ export declare class AuthController {
         message: string;
     }>;
     mfaSetup(user: User, dto: MfaSetupDto): Promise<{
-        secret: string;
-        otpauthUrl: string;
         qrCodeUrl: string | undefined;
-        backupCodes: string[];
         mfaEnabled: boolean;
-        mfaSecret: string;
     }>;
     mfaVerify(userId: string, dto: MfaVerifyDto): Promise<{
+        verified: boolean;
+        message: string;
+    }>;
+    mfaVerifyAndDisable(userId: string, dto: MfaVerifyDto): Promise<{
         verified: boolean;
         message: string;
     }>;

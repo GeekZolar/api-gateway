@@ -6,6 +6,7 @@ export declare class JwtStrategy extends JwtStrategy_base {
     constructor(config: ConfigService);
     validate(payload: JwtPayload & {
         type?: string;
+        session_id?: string;
     }): {
         userId: string;
         username: string;

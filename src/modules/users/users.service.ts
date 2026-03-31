@@ -49,6 +49,7 @@ export class UsersService {
       username: dto.username,
       email: dto.email,
       passwordHash,
+      isDefaultPassword: true,
       firstName: dto.firstName,
       lastName: dto.lastName,
       roleId: dto.roleId,
@@ -77,6 +78,7 @@ export class UsersService {
       lastName: saved.lastName,
       isActive: saved.isActive,
       isApproved: saved.isApproved,
+      isDefaultPassword: saved.isDefaultPassword,
       message: 'User created successfully. Pending approval.',
     };
   }
@@ -96,6 +98,13 @@ export class UsersService {
     user.approvedBy = approvedBy;
     user.approvedDate = new Date();
     await this.userRepo.save(user);
+
+    // send email to user with the link to the dashboard and the temporary password
+    // const dashboardUrl = `${process.env.DASHBOARD_URL}/login`;
+    // const temporaryPassword = user.password;
+    // const emailSubject = 'User Approved';
+    // const emailBody = `Your account has been approved. Please click the link below to login: ${dashboardUrl}`;
+    // await this.emailService.sendEmail(user.email, emailSubject, emailBody, temporaryPassword);
 
     await this.auditService.log({
       userId: approvedBy,
@@ -291,6 +300,7 @@ export class UsersService {
 
     await this.passwordService.addToHistory(userId, user.passwordHash);
     user.passwordHash = newHash;
+    user.isDefaultPassword = false;
     user.passwordLastChangedDate = new Date();
     await this.userRepo.save(user);
 
