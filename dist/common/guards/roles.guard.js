@@ -1,41 +1,56 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: Object.getOwnPropertyDescriptor(all, name).get
+    });
+}
+_export(exports, {
+    get ROLES_KEY () {
+        return ROLES_KEY;
+    },
+    get RolesGuard () {
+        return RolesGuard;
+    }
+});
+const _common = require("@nestjs/common");
+const _core = require("@nestjs/core");
+function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    else for(var i = decorators.length - 1; i >= 0; i--)if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
+}
+function _ts_metadata(k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RolesGuard = exports.ROLES_KEY = void 0;
-const common_1 = require("@nestjs/common");
-const core_1 = require("@nestjs/core");
-exports.ROLES_KEY = 'roles';
+}
+const ROLES_KEY = 'roles';
 let RolesGuard = class RolesGuard {
-    constructor(reflector) {
-        this.reflector = reflector;
-    }
     canActivate(context) {
-        const requiredRoles = this.reflector.getAllAndOverride(exports.ROLES_KEY, [
+        const requiredRoles = this.reflector.getAllAndOverride(ROLES_KEY, [
             context.getHandler(),
-            context.getClass(),
+            context.getClass()
         ]);
-        if (!requiredRoles?.length)
-            return true;
+        if (!requiredRoles?.length) return true;
         const { user } = context.switchToHttp().getRequest();
-        if (!user?.role)
-            throw new common_1.ForbiddenException('Access denied');
-        const hasRole = requiredRoles.some((role) => user.role === role);
-        if (!hasRole)
-            throw new common_1.ForbiddenException('Access denied');
+        if (!user?.role) throw new _common.ForbiddenException('Access denied');
+        const hasRole = requiredRoles.some((role)=>user.role === role);
+        if (!hasRole) throw new _common.ForbiddenException('Access denied');
         return true;
     }
+    constructor(reflector){
+        this.reflector = reflector;
+    }
 };
-exports.RolesGuard = RolesGuard;
-exports.RolesGuard = RolesGuard = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [core_1.Reflector])
+RolesGuard = _ts_decorate([
+    (0, _common.Injectable)(),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", [
+        typeof _core.Reflector === "undefined" ? Object : _core.Reflector
+    ])
 ], RolesGuard);
+
 //# sourceMappingURL=roles.guard.js.map

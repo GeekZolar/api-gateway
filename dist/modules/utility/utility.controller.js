@@ -1,25 +1,29 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "UtilityController", {
+    enumerable: true,
+    get: function() {
+        return UtilityController;
+    }
+});
+const _common = require("@nestjs/common");
+const _swagger = require("@nestjs/swagger");
+const _utilityservice = require("./utility.service");
+const _jwtauthguard = require("../../common/guards/jwt-auth.guard");
+const _permissionsguard = require("../../common/guards/permissions.guard");
+const _permissionsdecorator = require("../../common/decorators/permissions.decorator");
+function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    else for(var i = decorators.length - 1; i >= 0; i--)if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
+}
+function _ts_metadata(k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.UtilityController = void 0;
-const common_1 = require("@nestjs/common");
-const swagger_1 = require("@nestjs/swagger");
-const utility_service_1 = require("./utility.service");
-const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
-const permissions_guard_1 = require("../../common/guards/permissions.guard");
-const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
+}
 let UtilityController = class UtilityController {
-    constructor(utilityService) {
-        this.utilityService = utilityService;
-    }
     countries() {
         return this.utilityService.findCountries();
     }
@@ -35,61 +39,77 @@ let UtilityController = class UtilityController {
     products() {
         return this.utilityService.findProducts();
     }
+    constructor(utilityService){
+        this.utilityService = utilityService;
+    }
 };
-exports.UtilityController = UtilityController;
-__decorate([
-    (0, common_1.Get)('countries'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    (0, permissions_decorator_1.RequirePermissions)('inventory.read'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'List countries (snadb)' }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+_ts_decorate([
+    (0, _common.Get)('countries'),
+    (0, _common.UseGuards)(_jwtauthguard.JwtAuthGuard, _permissionsguard.PermissionsGuard),
+    (0, _permissionsdecorator.RequirePermissions)('inventory.read'),
+    (0, _swagger.ApiBearerAuth)(),
+    (0, _swagger.ApiOperation)({
+        summary: 'List countries (snadb)'
+    }),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", []),
+    _ts_metadata("design:returntype", void 0)
 ], UtilityController.prototype, "countries", null);
-__decorate([
-    (0, common_1.Get)('categories'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    (0, permissions_decorator_1.RequirePermissions)('inventory.read'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'List categories (snadb)' }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+_ts_decorate([
+    (0, _common.Get)('categories'),
+    (0, _common.UseGuards)(_jwtauthguard.JwtAuthGuard, _permissionsguard.PermissionsGuard),
+    (0, _permissionsdecorator.RequirePermissions)('inventory.read'),
+    (0, _swagger.ApiBearerAuth)(),
+    (0, _swagger.ApiOperation)({
+        summary: 'List categories (snadb)'
+    }),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", []),
+    _ts_metadata("design:returntype", void 0)
 ], UtilityController.prototype, "categories", null);
-__decorate([
-    (0, common_1.Get)('warehouses'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    (0, permissions_decorator_1.RequirePermissions)('inventory.read'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'List warehouses (snadb)' }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+_ts_decorate([
+    (0, _common.Get)('warehouses'),
+    (0, _common.UseGuards)(_jwtauthguard.JwtAuthGuard, _permissionsguard.PermissionsGuard),
+    (0, _permissionsdecorator.RequirePermissions)('inventory.read'),
+    (0, _swagger.ApiBearerAuth)(),
+    (0, _swagger.ApiOperation)({
+        summary: 'List warehouses (snadb)'
+    }),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", []),
+    _ts_metadata("design:returntype", void 0)
 ], UtilityController.prototype, "warehouses", null);
-__decorate([
-    (0, common_1.Get)('suppliers'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    (0, permissions_decorator_1.RequirePermissions)('inventory.read'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'List suppliers (snadb)' }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+_ts_decorate([
+    (0, _common.Get)('suppliers'),
+    (0, _common.UseGuards)(_jwtauthguard.JwtAuthGuard, _permissionsguard.PermissionsGuard),
+    (0, _permissionsdecorator.RequirePermissions)('inventory.read'),
+    (0, _swagger.ApiBearerAuth)(),
+    (0, _swagger.ApiOperation)({
+        summary: 'List suppliers (snadb)'
+    }),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", []),
+    _ts_metadata("design:returntype", void 0)
 ], UtilityController.prototype, "suppliers", null);
-__decorate([
-    (0, common_1.Get)('products'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    (0, permissions_decorator_1.RequirePermissions)('inventory.read'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'List products (snadb)' }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+_ts_decorate([
+    (0, _common.Get)('products'),
+    (0, _common.UseGuards)(_jwtauthguard.JwtAuthGuard, _permissionsguard.PermissionsGuard),
+    (0, _permissionsdecorator.RequirePermissions)('inventory.read'),
+    (0, _swagger.ApiBearerAuth)(),
+    (0, _swagger.ApiOperation)({
+        summary: 'List products (snadb)'
+    }),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", []),
+    _ts_metadata("design:returntype", void 0)
 ], UtilityController.prototype, "products", null);
-exports.UtilityController = UtilityController = __decorate([
-    (0, swagger_1.ApiTags)('utility'),
-    (0, common_1.Controller)('utility'),
-    __metadata("design:paramtypes", [utility_service_1.UtilityService])
+UtilityController = _ts_decorate([
+    (0, _swagger.ApiTags)('utility'),
+    (0, _common.Controller)('utility'),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", [
+        typeof _utilityservice.UtilityService === "undefined" ? Object : _utilityservice.UtilityService
+    ])
 ], UtilityController);
+
 //# sourceMappingURL=utility.controller.js.map

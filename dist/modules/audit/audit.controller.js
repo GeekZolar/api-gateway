@@ -1,29 +1,35 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "AuditController", {
+    enumerable: true,
+    get: function() {
+        return AuditController;
+    }
+});
+const _common = require("@nestjs/common");
+const _swagger = require("@nestjs/swagger");
+const _auditservice = require("./audit.service");
+const _auditquerydto = require("./dto/audit-query.dto");
+const _jwtauthguard = require("../../common/guards/jwt-auth.guard");
+const _permissionsguard = require("../../common/guards/permissions.guard");
+const _permissionsdecorator = require("../../common/decorators/permissions.decorator");
+function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    else for(var i = decorators.length - 1; i >= 0; i--)if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
+}
+function _ts_metadata(k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuditController = void 0;
-const common_1 = require("@nestjs/common");
-const swagger_1 = require("@nestjs/swagger");
-const audit_service_1 = require("./audit.service");
-const audit_query_dto_1 = require("./dto/audit-query.dto");
-const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
-const permissions_guard_1 = require("../../common/guards/permissions.guard");
-const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
+}
+function _ts_param(paramIndex, decorator) {
+    return function(target, key) {
+        decorator(target, key, paramIndex);
+    };
+}
 let AuditController = class AuditController {
-    constructor(auditService) {
-        this.auditService = auditService;
-    }
     async findAll(query) {
         const startDate = query.startDate ? new Date(query.startDate) : undefined;
         const endDate = query.endDate ? new Date(query.endDate) : undefined;
@@ -34,24 +40,34 @@ let AuditController = class AuditController {
             startDate,
             endDate,
             page: query.page,
-            limit: query.limit,
+            limit: query.limit
         });
     }
+    constructor(auditService){
+        this.auditService = auditService;
+    }
 };
-exports.AuditController = AuditController;
-__decorate([
-    (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Query audit logs with filters and pagination' }),
-    __param(0, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [audit_query_dto_1.AuditQueryDto]),
-    __metadata("design:returntype", Promise)
+_ts_decorate([
+    (0, _common.Get)(),
+    (0, _swagger.ApiOperation)({
+        summary: 'Query audit logs with filters and pagination'
+    }),
+    _ts_param(0, (0, _common.Query)()),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", [
+        typeof _auditquerydto.AuditQueryDto === "undefined" ? Object : _auditquerydto.AuditQueryDto
+    ]),
+    _ts_metadata("design:returntype", Promise)
 ], AuditController.prototype, "findAll", null);
-exports.AuditController = AuditController = __decorate([
-    (0, swagger_1.ApiTags)('audit-logs'),
-    (0, common_1.Controller)('audit-logs'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
-    (0, permissions_decorator_1.RequirePermissions)('auditLogs.read'),
-    __metadata("design:paramtypes", [audit_service_1.AuditService])
+AuditController = _ts_decorate([
+    (0, _swagger.ApiTags)('audit-logs'),
+    (0, _common.Controller)('audit-logs'),
+    (0, _common.UseGuards)(_jwtauthguard.JwtAuthGuard, _permissionsguard.PermissionsGuard),
+    (0, _permissionsdecorator.RequirePermissions)('auditLogs.read'),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", [
+        typeof _auditservice.AuditService === "undefined" ? Object : _auditservice.AuditService
+    ])
 ], AuditController);
+
 //# sourceMappingURL=audit.controller.js.map

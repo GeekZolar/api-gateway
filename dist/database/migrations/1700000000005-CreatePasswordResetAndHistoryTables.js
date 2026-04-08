@@ -1,10 +1,14 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreatePasswordResetAndHistoryTables1700000000005 = void 0;
-class CreatePasswordResetAndHistoryTables1700000000005 {
-    constructor() {
-        this.name = 'CreatePasswordResetAndHistoryTables1700000000005';
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "CreatePasswordResetAndHistoryTables1700000000005", {
+    enumerable: true,
+    get: function() {
+        return CreatePasswordResetAndHistoryTables1700000000005;
     }
+});
+let CreatePasswordResetAndHistoryTables1700000000005 = class CreatePasswordResetAndHistoryTables1700000000005 {
     async up(queryRunner) {
         await queryRunner.query(`
       CREATE TABLE "password_reset_tokens" (
@@ -39,6 +43,9 @@ class CreatePasswordResetAndHistoryTables1700000000005 {
         await queryRunner.query(`DROP INDEX "idx_reset_token_hash"`);
         await queryRunner.query(`DROP TABLE "password_reset_tokens"`);
     }
-}
-exports.CreatePasswordResetAndHistoryTables1700000000005 = CreatePasswordResetAndHistoryTables1700000000005;
+    constructor(){
+        this.name = 'CreatePasswordResetAndHistoryTables1700000000005';
+    }
+};
+
 //# sourceMappingURL=1700000000005-CreatePasswordResetAndHistoryTables.js.map

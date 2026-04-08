@@ -1,8 +1,23 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RequirePermissions = exports.PERMISSIONS_KEY = void 0;
-const common_1 = require("@nestjs/common");
-exports.PERMISSIONS_KEY = 'permissions';
-const RequirePermissions = (...permissions) => (0, common_1.SetMetadata)(exports.PERMISSIONS_KEY, permissions);
-exports.RequirePermissions = RequirePermissions;
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: Object.getOwnPropertyDescriptor(all, name).get
+    });
+}
+_export(exports, {
+    get PERMISSIONS_KEY () {
+        return PERMISSIONS_KEY;
+    },
+    get RequirePermissions () {
+        return RequirePermissions;
+    }
+});
+const _common = require("@nestjs/common");
+const PERMISSIONS_KEY = 'permissions';
+const RequirePermissions = (...permissions)=>(0, _common.SetMetadata)(PERMISSIONS_KEY, permissions);
+
 //# sourceMappingURL=permissions.decorator.js.map

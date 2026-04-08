@@ -1,10 +1,18 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CurrentUser = void 0;
-const common_1 = require("@nestjs/common");
-exports.CurrentUser = (0, common_1.createParamDecorator)((data, ctx) => {
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "CurrentUser", {
+    enumerable: true,
+    get: function() {
+        return CurrentUser;
+    }
+});
+const _common = require("@nestjs/common");
+const CurrentUser = (0, _common.createParamDecorator)((data, ctx)=>{
     const request = ctx.switchToHttp().getRequest();
     const user = request.user;
     return data ? user?.[data] : user;
 });
+
 //# sourceMappingURL=current-user.decorator.js.map

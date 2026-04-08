@@ -1,10 +1,14 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateUserSessionsTable1700000000003 = void 0;
-class CreateUserSessionsTable1700000000003 {
-    constructor() {
-        this.name = 'CreateUserSessionsTable1700000000003';
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "CreateUserSessionsTable1700000000003", {
+    enumerable: true,
+    get: function() {
+        return CreateUserSessionsTable1700000000003;
     }
+});
+let CreateUserSessionsTable1700000000003 = class CreateUserSessionsTable1700000000003 {
     async up(queryRunner) {
         await queryRunner.query(`
       CREATE TABLE "user_sessions" (
@@ -31,6 +35,9 @@ class CreateUserSessionsTable1700000000003 {
         await queryRunner.query(`DROP INDEX "idx_sessions_user_id"`);
         await queryRunner.query(`DROP TABLE "user_sessions"`);
     }
-}
-exports.CreateUserSessionsTable1700000000003 = CreateUserSessionsTable1700000000003;
+    constructor(){
+        this.name = 'CreateUserSessionsTable1700000000003';
+    }
+};
+
 //# sourceMappingURL=1700000000003-CreateUserSessionsTable.js.map

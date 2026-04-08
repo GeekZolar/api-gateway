@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import gatewayConfig from './config/gateway.config';
+import databaseConfig from './config/database.config';
+import jwtConfig from './config/jwt.config';
 import { ProxyModule } from './proxy/proxy.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -10,15 +12,20 @@ import { InventoryModule } from './inventory/inventory.module';
 import { ForecastsModule } from './forecasts/forecasts.module';
 import { PurchaseOrdersModule } from './purchase-orders/purchase-orders.module';
 import { ReportsModule } from './reports/reports.module';
-import { ImsModule } from './ims/ims.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { RecommendationsModule } from './recommendations/recommendations.module';
+// sola_dev modules
+import { AuthModule as UserAuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { UtilityModule } from './modules/utility/utility.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [gatewayConfig],
+      load: [gatewayConfig, databaseConfig, jwtConfig],
       envFilePath: ['.env.local', '.env'],
     }),
     TypeOrmModule.forRootAsync({
@@ -33,7 +40,15 @@ import { RecommendationsModule } from './recommendations/recommendations.module'
         ssl: config.get('database.ssl'),
         synchronize: config.get('database.synchronize'),
         logging: config.get('database.logging'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [
+          __dirname + '/auth/**/*.entity{.ts,.js}',
+          __dirname + '/users/**/*.entity{.ts,.js}',
+          __dirname + '/inventory/**/*.entity{.ts,.js}',
+          __dirname + '/forecasts/**/*.entity{.ts,.js}',
+          __dirname + '/purchase-orders/**/*.entity{.ts,.js}',
+          __dirname + '/reports/**/*.entity{.ts,.js}',
+          __dirname + '/modules/**/*.entity{.ts,.js}',
+        ],
         extra: {
           min: config.get('database.poolMin', 5),
           max: config.get('database.poolMax', 20),
@@ -58,9 +73,13 @@ import { RecommendationsModule } from './recommendations/recommendations.module'
     ForecastsModule,
     PurchaseOrdersModule,
     ReportsModule,
-    ImsModule,
     DashboardModule,
     RecommendationsModule,
+    UserAuthModule,
+    UsersModule,
+    RolesModule,
+    AuditModule,
+    UtilityModule,
   ],
 })
 export class AppModule {}

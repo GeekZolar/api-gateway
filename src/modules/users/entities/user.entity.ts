@@ -10,8 +10,6 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Role } from '../../roles/entities/role.entity';
-import { UserSession } from '../../sessions/entities/session.entity';
-import { AuditLog } from '../../audit/entities/audit-log.entity';
 
 @Entity('users')
 export class User {
@@ -94,9 +92,9 @@ export class User {
   @UpdateDateColumn({ name: 'updated_date' })
   updatedDate: Date;
 
-  @OneToMany(() => UserSession, (s) => s.user)
-  sessions: UserSession[];
+  @OneToMany('UserSession', (s: any) => s.user)
+  sessions: any[];
 
-  @OneToMany(() => AuditLog, (a) => a.user)
-  auditLogs: AuditLog[];
+  @OneToMany('AuditLog', (a: any) => a.user)
+  auditLogs: any[];
 }

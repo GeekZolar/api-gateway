@@ -1,24 +1,31 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "JwtRefreshGuard", {
+    enumerable: true,
+    get: function() {
+        return JwtRefreshGuard;
+    }
+});
+const _common = require("@nestjs/common");
+const _passport = require("@nestjs/passport");
+function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    else for(var i = decorators.length - 1; i >= 0; i--)if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.JwtRefreshGuard = void 0;
-const common_1 = require("@nestjs/common");
-const passport_1 = require("@nestjs/passport");
-let JwtRefreshGuard = class JwtRefreshGuard extends (0, passport_1.AuthGuard)('jwt-refresh') {
+}
+let JwtRefreshGuard = class JwtRefreshGuard extends (0, _passport.AuthGuard)('jwt-refresh') {
     handleRequest(err, user) {
         if (err || !user) {
-            throw err || new common_1.UnauthorizedException('Invalid or expired refresh token');
+            throw err || new _common.UnauthorizedException('Invalid or expired refresh token');
         }
         return user;
     }
 };
-exports.JwtRefreshGuard = JwtRefreshGuard;
-exports.JwtRefreshGuard = JwtRefreshGuard = __decorate([
-    (0, common_1.Injectable)()
+JwtRefreshGuard = _ts_decorate([
+    (0, _common.Injectable)()
 ], JwtRefreshGuard);
+
 //# sourceMappingURL=jwt-refresh.guard.js.map
