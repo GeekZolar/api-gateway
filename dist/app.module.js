@@ -1,106 +1,77 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-Object.defineProperty(exports, "AppModule", {
-    enumerable: true,
-    get: function() {
-        return AppModule;
-    }
-});
-const _common = require("@nestjs/common");
-const _config = require("@nestjs/config");
-const _typeorm = require("@nestjs/typeorm");
-const _throttler = require("@nestjs/throttler");
-const _gatewayconfig = /*#__PURE__*/ _interop_require_default(require("./config/gateway.config"));
-const _usersmodule = require("./users/users.module");
-const _authmodule = require("./auth/auth.module");
-const _rolesmodule = require("./roles/roles.module");
-const _inventorymodule = require("./inventory/inventory.module");
-const _forecastsmodule = require("./forecasts/forecasts.module");
-const _purchaseordersmodule = require("./purchase-orders/purchase-orders.module");
-const _recommendationsmodule = require("./recommendations/recommendations.module");
-const _reportsmodule = require("./reports/reports.module");
-const _dashboardmodule = require("./dashboard/dashboard.module");
-const _proxymodule = require("./proxy/proxy.module");
-const _healthmodule = require("./health/health.module");
-function _interop_require_default(obj) {
-    return obj && obj.__esModule ? obj : {
-        default: obj
-    };
-}
-function _ts_decorate(decorators, target, key, desc) {
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for(var i = decorators.length - 1; i >= 0; i--)if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AppModule = void 0;
+const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
+const typeorm_1 = require("@nestjs/typeorm");
+const throttler_1 = require("@nestjs/throttler");
+const app_config_1 = require("./config/app.config");
+const database_config_1 = require("./config/database.config");
+const jwt_config_1 = require("./config/jwt.config");
+const throttle_config_1 = require("./config/throttle.config");
+const auth_module_1 = require("./modules/auth/auth.module");
+const users_module_1 = require("./modules/users/users.module");
+const roles_module_1 = require("./modules/roles/roles.module");
+const audit_module_1 = require("./modules/audit/audit.module");
+const health_module_1 = require("./modules/health/health.module");
+const utility_module_1 = require("./modules/utility/utility.module");
 let AppModule = class AppModule {
 };
-AppModule = _ts_decorate([
-    (0, _common.Module)({
+exports.AppModule = AppModule;
+exports.AppModule = AppModule = __decorate([
+    (0, common_1.Module)({
         imports: [
-            _config.ConfigModule.forRoot({
+            config_1.ConfigModule.forRoot({
                 isGlobal: true,
-                load: [
-                    _gatewayconfig.default
-                ],
-                envFilePath: [
-                    '.env.local',
-                    '.env'
-                ]
+                load: [app_config_1.default, database_config_1.default, jwt_config_1.default, throttle_config_1.default],
+                envFilePath: ['.env.local', '.env'],
             }),
-            _throttler.ThrottlerModule.forRootAsync({
-                useFactory: (config)=>({
-                        throttlers: [
-                            {
-                                ttl: config.get('throttleTtl', 900000),
-                                limit: config.get('throttleLimit', 100)
-                            }
-                        ]
-                    }),
-                inject: [
-                    _config.ConfigService
-                ],
-                imports: [
-                    _config.ConfigModule
-                ]
+            typeorm_1.TypeOrmModule.forRootAsync({
+                useFactory: (config) => ({
+                    type: 'postgres',
+                    host: config.get('database.host'),
+                    port: config.get('database.port'),
+                    username: config.get('database.username'),
+                    password: config.get('database.password'),
+                    database: config.get('database.database'),
+                    schema: config.get('database.schema', 'public'),
+                    ssl: config.get('database.ssl'),
+                    synchronize: config.get('database.synchronize'),
+                    logging: config.get('database.logging'),
+                    entities: [__dirname + '/**/*.entity{.ts,.js}'],
+                    extra: {
+                        min: config.get('database.poolMin', 5),
+                        max: config.get('database.poolMax', 20),
+                    },
+                }),
+                inject: [config_1.ConfigService],
+                imports: [config_1.ConfigModule],
             }),
-            _typeorm.TypeOrmModule.forRootAsync({
-                useFactory: (config)=>({
-                        type: 'postgres',
-                        url: config.get('databaseUrl'),
-                        autoLoadEntities: true,
-                        synchronize: process.env.NODE_ENV === 'production' ? false : process.env.SYNC_DB === 'true',
-                        logging: process.env.DB_LOGGING === 'true' ? true : [
-                            'error'
-                        ],
-                        // Fail fast if DB unreachable (e.g. Postgres not running) instead of hanging
-                        connectTimeoutMS: 10000,
-                        extra: {
-                            connectionTimeoutMillis: 10000
-                        }
-                    }),
-                inject: [
-                    _config.ConfigService
-                ],
-                imports: [
-                    _config.ConfigModule
-                ]
+            throttler_1.ThrottlerModule.forRootAsync({
+                useFactory: (config) => ({
+                    throttlers: [
+                        {
+                            ttl: config.get('throttle.ttl', 900000),
+                            limit: config.get('throttle.limit', 100),
+                        },
+                    ],
+                }),
+                inject: [config_1.ConfigService],
+                imports: [config_1.ConfigModule],
             }),
-            _usersmodule.UsersModule,
-            _authmodule.AuthModule,
-            _rolesmodule.RolesModule,
-            _inventorymodule.InventoryModule,
-            _forecastsmodule.ForecastsModule,
-            _purchaseordersmodule.PurchaseOrdersModule,
-            _recommendationsmodule.RecommendationsModule,
-            _reportsmodule.ReportsModule,
-            _dashboardmodule.DashboardModule,
-            _proxymodule.ProxyModule,
-            _healthmodule.HealthModule
-        ]
+            auth_module_1.AuthModule,
+            users_module_1.UsersModule,
+            roles_module_1.RolesModule,
+            audit_module_1.AuditModule,
+            health_module_1.HealthModule,
+            utility_module_1.UtilityModule,
+        ],
     })
 ], AppModule);
-
 //# sourceMappingURL=app.module.js.map

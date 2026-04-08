@@ -40,7 +40,6 @@ async function bootstrap() {
     exclude: ['docs', 'docs-json', 'docs-json/(.*)'],
   });
 
-  // Swagger: enable unless explicitly disabled (full doc from all controllers)
   let swaggerReady = false;
   if (process.env.SWAGGER_DISABLED !== 'true') {
     try {
