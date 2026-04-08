@@ -19,13 +19,16 @@ async function bootstrap() {
     }),
   );
 
-  app.use(
-    helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
-      crossOriginOpenerPolicy: false,
-    }),
-  );
+  // Disable helmet in non-HTTPS environments to prevent COOP header issues
+  if (process.env.NODE_ENV === 'production' && process.env.HTTPS === 'true') {
+    app.use(
+      helmet({
+        contentSecurityPolicy: false,
+        crossOriginEmbedderPolicy: false,
+        crossOriginOpenerPolicy: false,
+      }),
+    );
+  }
 
   const origins = config.get<string>('allowedOrigins', '*');
   app.enableCors({
@@ -59,7 +62,11 @@ async function bootstrap() {
         .addTag('root', 'Service info')
         .build();
       const document = SwaggerModule.createDocument(app, swaggerConfig);
-      SwaggerModule.setup('docs', app, document);
+      SwaggerModule.setup('docs', app, document, {
+        customCssUrl: '/docs/swagger-ui.css',
+        customJs: ['/docs/swagger-ui-bundle.js', '/docs/swagger-ui-standalone-preset.js'],
+        swaggerOptions: { persistAuthorization: true },
+      });
       swaggerReady = true;
     } catch (err) {
       try {
