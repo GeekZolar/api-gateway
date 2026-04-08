@@ -9,19 +9,22 @@ function parsePort(value: string | undefined): number | undefined {
   return Number.isNaN(n) ? undefined : n;
 }
 
-export default () => ({
-  database: {
-    type: process.env.DB_TYPE as any,
-    host: process.env.DB_HOST,
-    port: parsePort(process.env.DB_PORT),
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    schema: process.env.DB_SCHEMA || 'public',
-    ssl: parseBool(process.env.DB_SSL),
-    synchronize: parseBool(process.env.DB_SYNCHRONIZE),
-    logging: parseBool(process.env.DB_LOGGING),
-    poolMin: parsePort(process.env.DB_POOL_MIN),
-    poolMax: parsePort(process.env.DB_POOL_MAX),
-  },
-});
+export default () => {
+  const sslEnabled = parseBool(process.env.DB_SSL);
+  return {
+    database: {
+      type: process.env.DB_TYPE as any,
+      host: process.env.DB_HOST,
+      port: parsePort(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+      schema: process.env.DB_SCHEMA || 'public',
+      ssl: sslEnabled ? { rejectUnauthorized: false } : false,
+      synchronize: parseBool(process.env.DB_SYNCHRONIZE),
+      logging: parseBool(process.env.DB_LOGGING),
+      poolMin: parsePort(process.env.DB_POOL_MIN),
+      poolMax: parsePort(process.env.DB_POOL_MAX),
+    },
+  };
+};
