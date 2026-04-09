@@ -1,0 +1,161 @@
+{
+  "info": {
+    "name": "API Gateway",
+    "description": "Test the API Gateway endpoints one by one. Base: http://localhost:3000/api/v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Root (service info)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/",
+        "description": "No auth. Returns gateway info and list of endpoints."
+      }
+    },
+    {
+      "name": "2. Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health",
+        "description": "No auth. Gateway health check."
+      }
+    },
+    {
+      "name": "3. Auth – Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"your_username\",\n  \"password\": \"your_password\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/login",
+        "description": "Gateway: username + password. Returns accessToken and refreshToken. Set collection variable 'token' to accessToken for protected routes."
+      }
+    },
+    {
+      "name": "4. Auth – Refresh",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"your_refresh_token\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/refresh",
+        "description": "Gateway: body { \"refreshToken\": \"...\" }. Returns new accessToken. Use refreshToken from login response."
+      }
+    },
+    {
+      "name": "5. Auth – Logout",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/auth/logout",
+        "description": "Gateway: no auth. Returns 200. Client should discard token."
+      }
+    },
+    {
+      "name": "6. Auth – Password reset request",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/password-reset/request",
+        "description": "Gateway: body { \"email\": \"user@example.com\" }. In non-production response includes 'token' for testing; use it in step 7."
+      }
+    },
+    {
+      "name": "7. Auth – Password reset confirm",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"token\": \"reset_token_from_email\",\n  \"newPassword\": \"newSecurePassword\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/password-reset/confirm",
+        "description": "Gateway: body { \"token\": \"from step 6 response\", \"newPassword\": \"NewSecure123\" }. Password rules: min 8 chars, 1 upper, 1 lower, 1 number."
+      }
+    },
+    {
+      "name": "8. Users – Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+        },
+        "url": "{{baseUrl}}/users",
+        "description": "Gateway: same as 8b. POST /users or /users/register. Body: email, username, password (same rules as 8b)."
+      }
+    },
+    {
+      "name": "8b. Users – Register (gateway DB)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"jane@example.com\",\n  \"username\": \"jane\",\n  \"password\": \"SecurePass123\"\n}"
+        },
+        "url": "{{baseUrl}}/users/register",
+        "description": "No auth. Creates user in gateway PostgreSQL. Password: min 8 chars, 1 uppercase, 1 lowercase, 1 number. Username: letters, numbers, _ - only."
+      }
+    },
+    {
+      "name": "9. Users – Get (authenticated)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/users",
+        "description": "Gateway: requires JWT (Bearer {{token}}). Returns current user profile (no password)."
+      }
+    },
+    {
+      "name": "10. Users – Update (PATCH)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"newemail@example.com\",\n  \"username\": \"newusername\"\n}"
+        },
+        "url": "{{baseUrl}}/users",
+        "description": "Gateway: requires JWT. Body: optional email and/or username (same validation as register)."
+      }
+    },
+    {
+      "name": "11. Roles – Get (authenticated)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/roles",
+        "description": "Gateway: requires JWT. Returns list of roles (e.g. user, admin)."
+      }
+    },
+    {
+      "name": "12. Roles – Registration (public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/roles/registration",
+        "description": "Gateway: no auth. Same list of roles for registration UI."
+      }
+    }
+  ]
+}
