@@ -13,29 +13,23 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { PurchaseOrdersService } from './purchase-orders.service';
 import { ListPurchaseOrdersDto } from './dto/list-purchase-orders.dto';
 import { CreatePurchaseOrderDto } from './dto/create-purchase-order.dto';
 import { ApprovePurchaseOrderDto } from './dto/approve-purchase-order.dto';
 import { ReceivePurchaseOrderDto } from './dto/receive-purchase-order.dto';
 
-const PO_LIST_ROLES: Parameters<typeof Roles>[0] = ['admin', 'inventory-manager', 'po-creator', 'po-approver'];
-const PO_CREATE_ROLES: Parameters<typeof Roles>[0] = ['admin', 'inventory-manager', 'po-creator'];
-const PO_APPROVE_ROLES: Parameters<typeof Roles>[0] = ['admin', 'po-approver'];
-const PO_RECEIVE_ROLES: Parameters<typeof Roles>[0] = ['admin', 'inventory-manager'];
-
 @ApiTags('purchase-orders')
 @Controller('purchase-orders')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class PurchaseOrdersController {
   constructor(private readonly purchaseOrdersService: PurchaseOrdersService) {}
 
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles(...PO_LIST_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @RequirePermissions('purchaseOrders.read')
   @ApiOperation({ summary: 'List purchase orders' })
   @ApiResponse({ status: 200, description: 'Paginated list' })
   list(@Query() dto: ListPurchaseOrdersDto) {
@@ -43,8 +37,9 @@ export class PurchaseOrdersController {
   }
 
   @Post()
-  @UseGuards(RolesGuard)
-  @Roles(...PO_CREATE_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @RequirePermissions('purchaseOrders.create')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create purchase order' })
   @ApiResponse({ status: 201, description: 'PO created' })
@@ -53,8 +48,9 @@ export class PurchaseOrdersController {
   }
 
   @Put(':id/approve')
-  @UseGuards(RolesGuard)
-  @Roles(...PO_APPROVE_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @RequirePermissions('purchaseOrders.approve')
   @ApiOperation({ summary: 'Approve purchase order' })
   @ApiResponse({ status: 200, description: 'PO approved' })
   approve(
@@ -65,8 +61,9 @@ export class PurchaseOrdersController {
   }
 
   @Post(':id/receive')
-  @UseGuards(RolesGuard)
-  @Roles(...PO_RECEIVE_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @RequirePermissions('purchaseOrders.update')
   @ApiOperation({ summary: 'Record PO receipt' })
   @ApiResponse({ status: 200, description: 'Receipt recorded' })
   receive(

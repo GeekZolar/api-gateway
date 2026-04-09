@@ -10,35 +10,23 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { InventoryService } from './inventory.service';
 import { FilterInventoryDto } from './dto/filter-inventory.dto';
 import { AdjustInventoryDto } from './dto/adjust-inventory.dto';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { ExpiringQueryDto } from './dto/expiring-query.dto';
 
-const ALL_INVENTORY_ROLES: Parameters<typeof Roles>[0] = [
-  'admin',
-  'inventory-manager',
-  'po-creator',
-  'po-approver',
-  'forecast-editor',
-  'read-only',
-  'user',
-];
-const EDIT_INVENTORY_ROLES: Parameters<typeof Roles>[0] = ['admin', 'inventory-manager'];
-
 @ApiTags('inventory')
 @Controller('inventory')
-@UseGuards(JwtAuthGuard)
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles(...ALL_INVENTORY_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth()
+  @RequirePermissions('inventory.read')
   @ApiOperation({ summary: 'List inventory with filters' })
   @ApiResponse({ status: 200, description: 'Paginated inventory list' })
   list(@Query() dto: FilterInventoryDto, @Req() req: { user?: { userId?: string } }) {
@@ -46,9 +34,9 @@ export class InventoryController {
   }
 
   @Get('expiring')
-  @UseGuards(RolesGuard)
-  @Roles(...ALL_INVENTORY_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth()
+  @RequirePermissions('inventory.read')
   @ApiOperation({ summary: 'Get expiring inventory within window' })
   @ApiResponse({ status: 200, description: 'List of expiring items' })
   expiring(@Query() dto: ExpiringQueryDto) {
@@ -56,9 +44,9 @@ export class InventoryController {
   }
 
   @Get(':sku')
-  @UseGuards(RolesGuard)
-  @Roles(...ALL_INVENTORY_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth()
+  @RequirePermissions('inventory.read')
   @ApiOperation({ summary: 'Get inventory details by SKU' })
   @ApiResponse({ status: 200, description: 'SKU details by location' })
   @ApiResponse({ status: 404, description: 'SKU not found' })
@@ -67,9 +55,9 @@ export class InventoryController {
   }
 
   @Post('adjust')
-  @UseGuards(RolesGuard)
-  @Roles(...EDIT_INVENTORY_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth()
+  @RequirePermissions('inventory.update')
   @ApiOperation({ summary: 'Create inventory adjustment' })
   @ApiResponse({ status: 200, description: 'Adjustment applied' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
@@ -78,9 +66,9 @@ export class InventoryController {
   }
 
   @Post('transfer')
-  @UseGuards(RolesGuard)
-  @Roles(...EDIT_INVENTORY_ROLES)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth()
+  @RequirePermissions('inventory.update')
   @ApiOperation({ summary: 'Create stock transfer between warehouses' })
   @ApiResponse({ status: 201, description: 'Transfer created' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })

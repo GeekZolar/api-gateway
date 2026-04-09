@@ -1,27 +1,23 @@
 import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { ForecastsService } from './forecasts.service';
 import { ForecastQueryDto } from './dto/forecast-query.dto';
 import { GenerateForecastsDto } from './dto/generate-forecasts.dto';
 import { OverrideForecastDto } from './dto/override-forecast.dto';
 import { AccuracyQueryDto } from './dto/accuracy-query.dto';
 
-const FORECAST_READ: Parameters<typeof Roles>[0] = ['admin', 'inventory-manager', 'forecast-editor'];
-const FORECAST_EDIT: Parameters<typeof Roles>[0] = ['admin', 'forecast-editor'];
-
 @ApiTags('forecasts')
 @Controller('forecasts')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class ForecastsController {
   constructor(private readonly forecastsService: ForecastsService) {}
 
   @Get('accuracy')
-  @UseGuards(RolesGuard)
-  @Roles(...FORECAST_EDIT)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @RequirePermissions('forecasts.update')
   @ApiOperation({ summary: 'Forecast accuracy metrics' })
   @ApiResponse({ status: 200, description: 'Accuracy metrics' })
   getAccuracy(@Query() dto: AccuracyQueryDto) {
@@ -29,8 +25,9 @@ export class ForecastsController {
   }
 
   @Post('generate')
-  @UseGuards(RolesGuard)
-  @Roles(...FORECAST_EDIT)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @RequirePermissions('forecasts.create')
   @ApiOperation({ summary: 'Trigger forecast generation job' })
   @ApiResponse({ status: 200, description: 'Job started' })
   generate(@Body() dto: GenerateForecastsDto) {
@@ -38,8 +35,9 @@ export class ForecastsController {
   }
 
   @Get(':sku')
-  @UseGuards(RolesGuard)
-  @Roles(...FORECAST_READ)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @RequirePermissions('forecasts.read')
   @ApiOperation({ summary: 'Get forecast for SKU' })
   @ApiResponse({ status: 200, description: 'Forecast data' })
   @ApiResponse({ status: 404, description: 'SKU not found' })
@@ -51,8 +49,9 @@ export class ForecastsController {
   }
 
   @Put(':sku')
-  @UseGuards(RolesGuard)
-  @Roles(...FORECAST_EDIT)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiBearerAuth()
+  @RequirePermissions('forecasts.update')
   @ApiOperation({ summary: 'Override forecast for SKU' })
   @ApiResponse({ status: 200, description: 'Override applied' })
   @ApiResponse({ status: 404, description: 'SKU or forecast not found' })

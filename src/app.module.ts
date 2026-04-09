@@ -5,7 +5,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import gatewayConfig from './config/gateway.config';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
-import { ProxyModule } from './proxy/proxy.module';
 import { HealthModule } from './health/health.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ForecastsModule } from './forecasts/forecasts.module';
@@ -41,7 +40,6 @@ import { CommonModule } from './common/common.module';
         synchronize: config.get('database.synchronize'),
         logging: config.get('database.logging'),
         entities: [
-          __dirname + '/users/**/*.entity{.ts,.js}',
           __dirname + '/inventory/**/*.entity{.ts,.js}',
           __dirname + '/forecasts/**/*.entity{.ts,.js}',
           __dirname + '/purchase-orders/**/*.entity{.ts,.js}',
@@ -65,7 +63,6 @@ import { CommonModule } from './common/common.module';
       inject: [ConfigService],
       imports: [ConfigModule],
     }),
-    ProxyModule,
     CommonModule,
     HealthModule,
     InventoryModule,
