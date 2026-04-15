@@ -1,12 +1,12 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity({ name: 'products', schema: 'snadb', synchronize: false })
 export class Product {
-  @PrimaryColumn({ name: 'product_id', type: 'int' })
-  productId: number;
+  @PrimaryGeneratedColumn('uuid', { name: 'product_id' })
+  productId: string;
 
-  @Column({ name: 'supplier_id', type: 'int', nullable: true })
-  supplierId: number | null;
+  @Column({ name: 'supplier_id', type: 'uuid', nullable: true })
+  supplierId: string | null;
 
   @Column({ name: 'product_name', type: 'varchar', length: 500 })
   productName: string;
@@ -14,8 +14,8 @@ export class Product {
   @Column({ name: 'description', type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ name: 'category_id', type: 'int', nullable: true })
-  categoryId: number | null;
+  @Column({ name: 'category_id', type: 'uuid', nullable: true })
+  categoryId: string | null;
 
   @Column({ name: 'product_size', type: 'varchar', length: 255, nullable: true })
   productSize: string | null;

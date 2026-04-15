@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -44,7 +45,9 @@ export class PurchaseOrdersController {
   @ApiOperation({ summary: 'Create purchase order' })
   @ApiResponse({ status: 201, description: 'PO created' })
   create(@Body() dto: CreatePurchaseOrderDto, @Req() req: { user?: { userId?: string } }) {
-    return this.purchaseOrdersService.create(dto, req.user?.userId);
+    const userId = req.user?.userId;
+    if (!userId) throw new UnauthorizedException('Authentication required');
+    return this.purchaseOrdersService.create(dto, userId);
   }
 
   @Put(':id/approve')

@@ -6,8 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Product } from './product.entity';
-import { Warehouse } from './warehouse.entity';
+import { Product } from '../../modules/utility/entities/product.entity';
+import { Warehouse } from '../../modules/utility/entities/warehouse.entity';
 
 @Entity('inventory_transactions')
 export class InventoryTransaction {

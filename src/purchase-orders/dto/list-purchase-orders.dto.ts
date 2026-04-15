@@ -11,7 +11,7 @@ export class ListPurchaseOrdersDto {
   warehouseId?: string;
 
   @IsOptional()
-  @IsIn(['draft', 'pending_approval', 'approved', 'received', 'cancelled'])
+  @IsIn(['Draft', 'Pending_approval', 'Approved', 'Received', 'Cancelled'])
   status?: string;
 
   @IsOptional()

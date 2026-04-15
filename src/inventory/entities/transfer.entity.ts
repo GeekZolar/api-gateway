@@ -8,7 +8,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Warehouse } from './warehouse.entity';
+import { Warehouse } from '../../modules/utility/entities/warehouse.entity';
 import { TransferLine } from './transfer-line.entity';
 
 @Entity('transfers')

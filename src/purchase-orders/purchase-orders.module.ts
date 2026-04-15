@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PurchaseOrder } from './entities/purchase-order.entity';
 import { PurchaseOrderLine } from './entities/purchase-order-line.entity';
-import { Supplier } from './entities/supplier.entity';
-import { Product } from '../inventory/entities/product.entity';
-import { Warehouse } from '../inventory/entities/warehouse.entity';
+import { Supplier } from '../modules/utility/entities/supplier.entity';
+import { Product } from '../modules/utility/entities/product.entity';
+import { Warehouse } from '../modules/utility/entities/warehouse.entity';
 import { PurchaseOrdersService } from './purchase-orders.service';
 import { PurchaseOrdersController } from './purchase-orders.controller';
 

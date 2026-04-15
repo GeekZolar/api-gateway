@@ -7,8 +7,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Product } from '../../inventory/entities/product.entity';
-import { Warehouse } from '../../inventory/entities/warehouse.entity';
+import { Product } from '../../modules/utility/entities/product.entity';
+import { Warehouse } from '../../modules/utility/entities/warehouse.entity';
 
 @Entity('forecasts')
 export class Forecast {

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Forecast } from './entities/forecast.entity';
-import { Product } from '../inventory/entities/product.entity';
+import { Product } from '../modules/utility/entities/product.entity';
 import { OverrideForecastDto } from './dto/override-forecast.dto';
 import { GenerateForecastsDto } from './dto/generate-forecasts.dto';
 
@@ -26,7 +26,7 @@ export class ForecastsService {
 
     const qb = this.forecastRepo
       .createQueryBuilder('f')
-      .where('f.product_id = :productId', { productId: product.id });
+      .where('f.product_id = :productId', { productId: product.productId });
     if (warehouseId) qb.andWhere('f.warehouse_id = :warehouseId', { warehouseId });
     if (from) qb.andWhere('f.period_start >= :from', { from });
     if (to) qb.andWhere('f.period_end <= :to', { to });
@@ -59,7 +59,7 @@ export class ForecastsService {
 
     const qb = this.forecastRepo
       .createQueryBuilder('f')
-      .where('f.product_id = :productId', { productId: product.id })
+      .where('f.product_id = :productId', { productId: product.productId })
       .andWhere('f.period_start = :periodStart', { periodStart: dto.periodStart })
       .andWhere('f.period_end = :periodEnd', { periodEnd: dto.periodEnd });
     if (dto.warehouseId) qb.andWhere('f.warehouse_id = :warehouseId', { warehouseId: dto.warehouseId });
@@ -68,7 +68,7 @@ export class ForecastsService {
     if (!forecast) {
       if (!dto.warehouseId) throw new NotFoundException('No forecast found for this period; provide warehouseId to create override.');
       const newForecast = this.forecastRepo.create({
-        productId: product.id,
+        productId: product.productId,
         warehouseId: dto.warehouseId,
         periodStart: dto.periodStart,
         periodEnd: dto.periodEnd,

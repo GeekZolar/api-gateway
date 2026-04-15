@@ -31,8 +31,15 @@ async function bootstrap() {
   }
 
   const origins = config.get<string>('allowedOrigins', '*');
+  // Always allow local Vite dev server (explicit requirement)
+  const extraOrigins = ['http://localhost:5173'];
   app.enableCors({
-    origin: typeof origins === 'string' ? origins.split(',').map((o) => o.trim()) : '*',
+    origin:
+      typeof origins === 'string'
+        ? Array.from(
+            new Set([...origins.split(',').map((o) => o.trim()).filter(Boolean), ...extraOrigins]),
+          )
+        : '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-ID'],

@@ -2,8 +2,8 @@ import { Entity, PrimaryColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity({ name: 'warehouse', schema: 'snadb', synchronize: false })
 export class Warehouse {
-  @PrimaryColumn({ name: 'warehouse_id', type: 'int' })
-  warehouseId: number;
+  @PrimaryColumn({ name: 'warehouse_id', type: 'uuid' })
+  warehouseId: string;
 
   @Column({ name: 'name', type: 'varchar', length: 255 })
   name: string;

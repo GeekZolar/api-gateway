@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import type { Relation } from 'typeorm';
 import type { Transfer } from './transfer.entity';
-import { Product } from './product.entity';
+import { Product } from '../../modules/utility/entities/product.entity';
 
 @Entity('transfer_lines')
 export class TransferLine {

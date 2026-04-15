@@ -7,11 +7,12 @@ import {
 } from 'typeorm';
 import type { Relation } from 'typeorm';
 import type { PurchaseOrder } from './purchase-order.entity';
-import { Product } from '../../inventory/entities/product.entity';
+import { Product } from '../../modules/utility/entities/product.entity';
 
-@Entity('purchase_order_lines')
+/** Maps to snadb.purchase_order_line */
+@Entity({ name: 'purchase_order_line', schema: 'snadb' })
 export class PurchaseOrderLine {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid', { name: 'po_line_id' })
   id: string;
 
   @Column({ name: 'purchase_order_id', type: 'uuid' })
@@ -28,12 +29,24 @@ export class PurchaseOrderLine {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @Column({ name: 'ordered_qty', type: 'decimal', precision: 14, scale: 4 })
-  orderedQty: number;
+  @Column({ name: 'ordered_quantity', type: 'decimal', precision: 18, scale: 2 })
+  orderedQuantity: string;
 
-  @Column({ name: 'received_qty', type: 'decimal', precision: 14, scale: 4, default: 0 })
-  receivedQty: number;
+  @Column({
+    name: 'received_quantity',
+    type: 'decimal',
+    precision: 18,
+    scale: 2,
+    default: 0,
+  })
+  receivedQuantity: string;
 
-  @Column({ name: 'unit_cost', type: 'decimal', precision: 14, scale: 4, default: 0 })
-  unitCost: number;
+  @Column({ name: 'unit_cost', type: 'decimal', precision: 18, scale: 2 })
+  unitCost: string;
+
+  @Column({ name: 'line_total', type: 'decimal', precision: 18, scale: 2 })
+  lineTotal: string;
+
+  @Column({ name: 'notes', type: 'text', nullable: true })
+  notes: string | null;
 }

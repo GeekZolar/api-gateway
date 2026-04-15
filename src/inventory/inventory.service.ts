@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, IsNull } from 'typeorm';
 import { Inventory } from './entities/inventory.entity';
 import { InventoryTransaction } from './entities/inventory-transaction.entity';
-import { Product } from './entities/product.entity';
-import { Warehouse } from './entities/warehouse.entity';
+import { Product } from '../modules/utility/entities/product.entity';
+import { Warehouse } from '../modules/utility/entities/warehouse.entity';
 import { Transfer } from './entities/transfer.entity';
 import { TransferLine } from './entities/transfer-line.entity';
 import { FilterInventoryDto } from './dto/filter-inventory.dto';
@@ -56,9 +56,9 @@ export class InventoryService {
         id: inv.id,
         sku: inv.product?.sku,
         productId: inv.productId,
-        productName: inv.product?.name,
+        productName: inv.product?.productName,
         warehouseId: inv.warehouseId,
-        warehouseCode: inv.warehouse?.code,
+        warehouseName: inv.warehouse?.name,
         lotNumber: inv.lotNumber,
         expiryDate: inv.expiryDate,
         quantityOnHand: Number(inv.quantityOnHand),
@@ -75,17 +75,17 @@ export class InventoryService {
     if (!product) throw new NotFoundException(`Product with SKU ${sku} not found`);
 
     const rows = await this.inventoryRepo.find({
-      where: { productId: product.id },
+      where: { productId: product.productId },
       relations: ['warehouse'],
     });
 
     return {
       sku: product.sku,
-      productId: product.id,
-      productName: product.name,
+      productId: product.productId,
+      productName: product.productName,
       byLocation: rows.map((r) => ({
         warehouseId: r.warehouseId,
-        warehouseCode: r.warehouse?.code,
+        warehouseName: r.warehouse?.name,
         lotNumber: r.lotNumber,
         expiryDate: r.expiryDate,
         quantityOnHand: Number(r.quantityOnHand),
@@ -111,7 +111,7 @@ export class InventoryService {
     const items = await qb.orderBy('inv.expiry_date').getMany();
     return items.map((inv) => ({
       sku: inv.product?.sku,
-      warehouseCode: inv.warehouse?.code,
+      warehouseName: inv.warehouse?.name,
       lotNumber: inv.lotNumber,
       expiryDate: inv.expiryDate,
       quantityOnHand: Number(inv.quantityOnHand),
@@ -119,17 +119,17 @@ export class InventoryService {
   }
 
   async adjust(dto: AdjustInventoryDto, userId?: string) {
-    const product = await this.productRepo.findOne({ where: { id: dto.productId } });
+    const product = await this.productRepo.findOne({ where: { productId: dto.productId } });
     if (!product) throw new NotFoundException('Product not found');
-    const warehouse = await this.warehouseRepo.findOne({ where: { id: dto.warehouseId } });
+    const warehouse = await this.warehouseRepo.findOne({ where: { warehouseId: dto.warehouseId } });
     if (!warehouse) throw new NotFoundException('Warehouse not found');
 
     let inv = await this.inventoryRepo.findOne({
       where: {
         productId: dto.productId,
         warehouseId: dto.warehouseId,
-        lotNumber: dto.lotNumber ?? null,
-        expiryDate: dto.expiryDate ?? null,
+        lotNumber: dto.lotNumber ?? IsNull(),
+        expiryDate: dto.expiryDate ?? IsNull(),
         status: 'available',
       },
     });
@@ -169,7 +169,7 @@ export class InventoryService {
     return {
       id: inv.id,
       sku: product.sku,
-      warehouseCode: warehouse.code,
+      warehouseName: warehouse.name,
       previousQuantity: Number(inv.quantityOnHand) - delta,
       newQuantity: Number(inv.quantityOnHand),
       reason: dto.reason,
@@ -180,8 +180,8 @@ export class InventoryService {
     if (dto.fromWarehouseId === dto.toWarehouseId) {
       throw new BadRequestException('From and to warehouse must be different');
     }
-    const fromWh = await this.warehouseRepo.findOne({ where: { id: dto.fromWarehouseId } });
-    const toWh = await this.warehouseRepo.findOne({ where: { id: dto.toWarehouseId } });
+    const fromWh = await this.warehouseRepo.findOne({ where: { warehouseId: dto.fromWarehouseId } });
+    const toWh = await this.warehouseRepo.findOne({ where: { warehouseId: dto.toWarehouseId } });
     if (!fromWh || !toWh) throw new NotFoundException('Warehouse not found');
 
     const transferNumber = `TR-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -198,7 +198,7 @@ export class InventoryService {
     await this.transferRepo.save(transfer);
 
     for (const line of dto.lines) {
-      const product = await this.productRepo.findOne({ where: { id: line.productId } });
+      const product = await this.productRepo.findOne({ where: { productId: line.productId } });
       if (!product) throw new NotFoundException(`Product ${line.productId} not found`);
       await this.transferLineRepo.save(
         this.transferLineRepo.create({
@@ -217,8 +217,8 @@ export class InventoryService {
     return {
       id: saved!.id,
       transferNumber: saved!.transferNumber,
-      fromWarehouse: saved!.fromWarehouse?.code,
-      toWarehouse: saved!.toWarehouse?.code,
+      fromWarehouse: saved!.fromWarehouse?.name,
+      toWarehouse: saved!.toWarehouse?.name,
       status: saved!.status,
       requestedDate: saved!.requestedDate,
       lines: saved!.lines?.map((l) => ({
@@ -231,40 +231,20 @@ export class InventoryService {
 
   async listWarehouses() {
     const list = await this.warehouseRepo.find({
-      order: { code: 'ASC' },
+      order: { name: 'ASC' },
     });
     return list.map((w) => ({
-      id: w.id,
-      code: w.code,
       name: w.name,
-      country: w.country,
-      state: w.state,
-      city: w.city,
+      warehouseId: w.warehouseId,
+      address: w.address,
+      location: w.location,
       isActive: w.isActive,
     }));
   }
 
   async createWarehouse(dto: CreateWarehouseDto) {
-    const existing = await this.warehouseRepo.findOne({ where: { code: dto.code } });
-    if (existing) throw new ConflictException(`Warehouse code "${dto.code}" already exists`);
-    const w = this.warehouseRepo.create({
-      code: dto.code,
-      name: dto.name,
-      country: dto.country,
-      state: dto.state,
-      city: dto.city,
-      isActive: dto.isActive ?? true,
-    });
-    const saved = await this.warehouseRepo.save(w);
-    return {
-      id: saved.id,
-      code: saved.code,
-      name: saved.name,
-      country: saved.country,
-      state: saved.state,
-      city: saved.city,
-      isActive: saved.isActive,
-    };
+    void dto;
+    throw new BadRequestException('Warehouse creation is not supported here. Use the snadb warehouse management flow.');
   }
 
   async listProducts() {
@@ -272,12 +252,10 @@ export class InventoryService {
       order: { sku: 'ASC' },
     });
     return list.map((p) => ({
-      id: p.id,
+      productId: p.productId,
       sku: p.sku,
-      name: p.name,
+      productName: p.productName,
       description: p.description,
-      uom: p.uom,
-      status: p.status,
     }));
   }
 
@@ -286,19 +264,15 @@ export class InventoryService {
     if (existing) throw new ConflictException(`Product SKU "${dto.sku}" already exists`);
     const p = this.productRepo.create({
       sku: dto.sku,
-      name: dto.name,
+      productName: dto.name,
       description: dto.description,
-      uom: dto.uom ?? 'EA',
-      status: dto.status ?? 'active',
     });
     const saved = await this.productRepo.save(p);
     return {
-      id: saved.id,
+      productId: saved.productId,
       sku: saved.sku,
-      name: saved.name,
+      productName: saved.productName,
       description: saved.description,
-      uom: saved.uom,
-      status: saved.status,
     };
   }
 }
